@@ -4,6 +4,7 @@ import {
   generateArrayWithRandomNumbers,
 } from './be-fundamentals/generateArrayWithRandomNumbers-easy';
 import { getMyAge } from './be-fundamentals/getMyAge';
+import { data, paginateArray, settings } from './be-fundamentals/pagination';
 
 const inputData = [
   'create',
@@ -26,6 +27,8 @@ const inputData = [
 // console.log(findPhraseInArray(inputData, 'ball'));
 // console.log(generateArrayWithRandomNumbers(5, 1, 10));
 // console.log(generateArrayOfArrays(4, 2, 1, 10));
-console.log(getMyAge(new Date(1990, 1, 1)));
-console.log(getMyAge('1990'));
-console.log(getMyAge(1990));
+//console.log(getMyAge(new Date(1990, 1, 1)));
+//console.log(getMyAge('1990'));
+//console.log(getMyAge(1990));
+
+const result = paginateArray(data, settings);
