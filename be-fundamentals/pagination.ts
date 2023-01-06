@@ -3,8 +3,8 @@ interface paginationSettings {
   entriesOnPage: number;
 }
 
-export const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-export const settings = { actualPageIdx: 0, entriesOnPage: 3 };
+const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const settings = { actualPageIdx: 0, entriesOnPage: 3 };
 
 export const paginateArray = (
   dataEntries: number[],
@@ -17,3 +17,5 @@ export const paginateArray = (
 
   return dataEntries.slice(startRange, endRange);
 };
+
+console.log(paginateArray(data, settings));

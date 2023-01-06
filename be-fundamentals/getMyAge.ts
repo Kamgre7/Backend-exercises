@@ -6,3 +6,7 @@ export const getMyAge = (input: yearOfBirthday) => {
 
   return currentYear - birthdayYear;
 };
+
+console.log(getMyAge(new Date(1990, 1, 1)));
+console.log(getMyAge('1990'));
+console.log(getMyAge(1990));

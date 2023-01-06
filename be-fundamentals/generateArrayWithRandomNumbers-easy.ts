@@ -17,3 +17,6 @@ export const generateArrayOfArrays = (
   Array.from(Array(howManyArrays), () =>
     generateArrayWithRandomNumbers(howManyNumbers, min, max)
   );
+
+console.log(generateArrayWithRandomNumbers(5, 1, 10));
+console.log(generateArrayOfArrays(4, 2, 1, 10));
