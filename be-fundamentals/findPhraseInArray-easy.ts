@@ -1,7 +1,7 @@
 type termArr = Array<[number, string]>;
 type findPhrase = termArr | string;
 
-const inputData = [
+export const inputData = [
   'create',
   'volleyball',
   'read',
@@ -23,14 +23,16 @@ export const findPhraseInArray = (
   inputData: string[],
   phrase: string
 ): findPhrase => {
-  const phraseArr: termArr = [];
+  const regex = new RegExp(phrase, 'gi');
 
-  inputData.forEach((word, index) => {
-    if (word.includes(phrase)) phraseArr.push([index, word]);
-  });
+  const result: termArr = inputData.reduce((prev, curr, index) => {
+    if (regex.test(curr)) return [...prev, [index, curr]];
 
-  return phraseArr.length > 0 ? phraseArr : 'Searched term does not exist';
+    return prev;
+  }, []);
+
+  return result.length > 0 ? result : 'Searched term does not exist';
 };
 
-console.log(findPhraseInArray(inputData, 'ball'));
-console.log(findPhraseInArray(inputData, 'ball'));
+findPhraseInArray(inputData, 'ball');
+findPhraseInArray(inputData, 'day');
