@@ -42,6 +42,18 @@ mapFn(randomNumbArr, (element, index) => element * 2);
 
 // **********************************************************************
 
+export function* entriesFn2<T>(array: T[]) {
+  let index = 0;
+  while (index <= array.length) {
+    yield array[index++];
+  }
+}
+
+const newResult = entriesFn2(randomObjArr);
+console.log('result', newResult.next().value);
+
+// **********************************************************************
+
 export const entriesFn = <T>(array: T[]): [number, T][] => {
   const entriesArray = [];
 
@@ -78,12 +90,37 @@ filterFn(randomNumbArr, (element) => element % 2 === 0);
 
 export const reduceFn = <T, K>(
   array: T[],
-  callback: (accumulator: K, currentValue: T) => K,
-  initial: K
-) => {
+  callback: (
+    accumulator: K,
+    currentValue: T,
+    currentIndex?: number,
+    array?: T[]
+  ) => K,
+  initial?: K
+): K => {
   let result = initial;
 
   for (let i = 0; i < array.length; i++) {
+    result = callback(result, array[i]);
+  }
+
+  return result;
+};
+
+export const reduceFn2 = <T, K>(
+  array: T[],
+  callback: (
+    accumulator: T | K,
+    currentValue: T,
+    currentIndex?: number,
+    array?: T[]
+  ) => K,
+  initial?: K
+): K => {
+  let i = initial ? 0 : 1;
+  let result = initial ?? callback(array[0], array[1]);
+
+  for (i; i < array.length; i++) {
     result = callback(result, array[i]);
   }
 
