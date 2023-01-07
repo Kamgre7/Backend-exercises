@@ -16,7 +16,9 @@ const forEachFn = <T>(
   return undefined;
 };
 
-// forEachFn(randomNumbArr, (element, indexElement) => console.log(element, indexElement));
+forEachFn(randomNumbArr, (element, indexElement) =>
+  console.log(element, indexElement)
+);
 
 // **********************************************************************
 
@@ -29,7 +31,7 @@ const mapFn = <T, K>(
   for (let i = 0; i < array.length; i++) {
     const newElement = callback(array[i], i);
     mapArray.push(newElement);
-    // mapArray[i]=newElement;
+    // mapArray[mapArray.length]=newElement;
   }
 
   return mapArray;
@@ -74,7 +76,19 @@ filterFn(randomNumbArr, (element) => element % 2 === 0);
 
 // **********************************************************************
 
-// const reduceFn = <T>(array: T[], callback, inital) => {};
+export const reduceFn = <T, K>(
+  array: T[],
+  callback: (accumulator: K, currentValue: T) => K,
+  initial: K
+) => {
+  let result = initial;
+
+  for (let i = 0; i < array.length; i++) {
+    result = callback(result, array[i]);
+  }
+
+  return result;
+};
 
 // **********************************************************************
 
@@ -83,9 +97,7 @@ export const everyFn = <T>(
   callback: (element: T, indexElement?: number) => boolean
 ): boolean => {
   for (let i = 0; i < array.length; i++) {
-    if (!callback(array[i], i)) {
-      return false;
-    }
+    if (!callback(array[i], i)) return false;
   }
 
   return true;
@@ -95,4 +107,15 @@ everyFn(randomNumbArr, (element) => element % 2 === 0);
 
 // **********************************************************************
 
-// const someFn = (array, callback) => {};
+export const someFn = <T>(
+  array: T[],
+  callback: (element: T, indexElement: number) => boolean
+): boolean => {
+  for (let i = 0; i < array.length; i++) {
+    if (callback(array[i], i)) return true;
+  }
+
+  return false;
+};
+
+someFn(randomNumbArr, (element) => element % 2 === 0);
