@@ -117,7 +117,7 @@ export const reduceFn2 = <T, K>(
   ) => K,
   initial?: K
 ): K => {
-  let i = initial ? 0 : 1;
+  let i = initial ? 0 : 2;
   let result = initial ?? callback(array[0], array[1]);
 
   for (i; i < array.length; i++) {
