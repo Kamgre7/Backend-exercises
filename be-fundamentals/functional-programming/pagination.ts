@@ -1,36 +1,54 @@
-type paginationSettings = {
+export type paginationSettings = {
   actualPageIdx: number;
   entriesOnPage: number;
 };
 
-type pageInfo = {
+export type pageInfo = {
   pagesCount: number;
   actualPageIdx: number;
   entriesOnPage: number;
   allElementsCount: number;
 };
 
-const validatePagination = (pageInformation: pageInfo) => {
-  const { actualPageIdx, allElementsCount, entriesOnPage, pagesCount } =
-    pageInformation;
+export const validateCurrentPage = (pageInformation: pageInfo) => {
+  const { actualPageIdx, pagesCount } = pageInformation;
 
   if (pagesCount < actualPageIdx) {
     throw new Error(`Last page is ${pagesCount}!`);
   }
+};
+
+export const validatePageNumber = (pageInformation: pageInfo) => {
+  const { actualPageIdx } = pageInformation;
 
   if (actualPageIdx < 0) {
     throw new Error(`Page must be grater or equal 0`);
   }
+};
+
+export const pageCounterIsInteger = (pageInformation: pageInfo) => {
+  const { actualPageIdx, entriesOnPage } = pageInformation;
+
+  if (!(Number.isInteger(actualPageIdx) || Number.isInteger(entriesOnPage))) {
+    throw new Error(`Must be integer `);
+  }
+};
+
+export const checkElementsOnPage = (pageInformation: pageInfo) => {
+  const { entriesOnPage, allElementsCount } = pageInformation;
 
   if (entriesOnPage > allElementsCount) {
     throw new Error(
       `Cannot be more elements on page than ${allElementsCount} `
     );
   }
+};
 
-  if (!(Number.isInteger(actualPageIdx) || Number.isInteger(entriesOnPage))) {
-    throw new Error(`Must be integer `);
-  }
+const validatePagination = (pageInformation: pageInfo) => {
+  validateCurrentPage(pageInformation);
+  validatePageNumber(pageInformation);
+  pageCounterIsInteger(pageInformation);
+  checkElementsOnPage(pageInformation);
 };
 
 export const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
