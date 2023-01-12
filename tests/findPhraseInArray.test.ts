@@ -1,8 +1,5 @@
 import { findPhraseInArray } from '../be-fundamentals/functional-programming/findPhraseInArray-easy';
 
-// mockowanie danych
-// użyć describe
-
 const inputData = [
   'create',
   'volleyball',

@@ -1,6 +1,6 @@
 type yearOfBirthday = string | number | Date;
 
-const validationAge = (birthdayYear: number, currentYear: number) => {
+export const validationAge = (birthdayYear: number, currentYear: number) => {
   if (currentYear - birthdayYear > 100) {
     throw new Error(
       "Invalid year of birth. You can't be more than 100 years old "
@@ -14,9 +14,12 @@ const validationAge = (birthdayYear: number, currentYear: number) => {
   }
 };
 
+const getUserBirthdayYear = (input: yearOfBirthday) =>
+  Number(input.toString().match(/\d{4}/g)![0]);
+
 export const getMyAge = (input: yearOfBirthday) => {
   const currentYear = new Date().getFullYear();
-  const birthdayYear = Number(input.toString().match(/\d{4}/g)[0]);
+  const birthdayYear = getUserBirthdayYear(input);
 
   validationAge(birthdayYear, currentYear);
 

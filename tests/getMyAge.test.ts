@@ -1,17 +1,26 @@
-import { getMyAge } from '../be-fundamentals/functional-programming/getMyAge';
+import {
+  getMyAge,
+  validationAge,
+} from '../be-fundamentals/functional-programming/getMyAge';
 
-test('function getMyAge should be defined before use', () => {
-  expect(getMyAge).toBeDefined();
-});
+const currentYear = new Date().getFullYear();
 
-test('Throw error about wrong birthday year', () => {
-  expect(() => getMyAge(2050)).toThrow('Invalid year of birth');
-});
+describe('Test getMyAge function', () => {
+  it('function getMyAge should be defined before use', () => {
+    expect(getMyAge).toBeDefined();
+  });
 
-test('Return current age of user', () => {
-  expect(getMyAge(2010)).toBe(13);
-});
+  it('Return current age of user', () => {
+    expect(getMyAge(2010)).toBe(13);
+  });
 
-test('String contain a birthday year', () => {
-  expect(new Date(1990, 1, 1).toString()).toMatch(/\d{4}/g);
+  it('String contain a birthday year', () => {
+    expect(new Date(1990, 1, 1).toString()).toMatch(/\d{4}/g);
+  });
+
+  it('Should return error - user birthday year cannot be greater than current year', () => {
+    expect(() => validationAge(2050, currentYear)).toThrow(
+      'Invalid year of birth'
+    );
+  });
 });
