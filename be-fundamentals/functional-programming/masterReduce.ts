@@ -8,14 +8,11 @@ export const randomObjArr = [
 export const mapFn = <T, K>(
   array: T[],
   callback: (element: T, index?: number) => K
-): K[] => {
-  const mappedArray: K[] = array.reduce(
+): K[] =>
+  array.reduce<K[]>(
     (prev, curr, index) => [...prev, callback(curr, index)],
     []
   );
-
-  return mappedArray;
-};
 
 mapFn(randomNumbArray, (element, index) => element * 2);
 
@@ -24,15 +21,12 @@ mapFn(randomNumbArray, (element, index) => element * 2);
 export const filterFn = <T>(
   array: T[],
   callback: (element: T, index?: number) => boolean
-): T[] => {
-  const filteredArray: T[] = array.reduce(
+): T[] =>
+  array.reduce<T[]>(
     (prev, curr, index) =>
       callback(curr, index) ? [...prev, curr] : [...prev],
     []
   );
-
-  return filteredArray;
-};
 
 filterFn(randomNumbArray, (element) => element % 2 === 0);
 
