@@ -5,7 +5,7 @@ export const randomObjArr = [
   { name: 'Rex', age: 2 },
 ];
 
-const forEachFn = <T>(
+export const forEachFn = <T>(
   array: T[],
   callback: (element: T, indexElement?: number) => void
 ): undefined => {
@@ -22,7 +22,7 @@ forEachFn(randomNumbArr, (element, indexElement) =>
 
 // **********************************************************************
 
-const mapFn = <T, K>(
+export const mapFn = <T, K>(
   array: T[],
   callback: (element: T, indexElement?: number) => K
 ): K[] => {
@@ -91,25 +91,6 @@ filterFn(randomNumbArr, (element) => element % 2 === 0);
 export const reduceFn = <T, K>(
   array: T[],
   callback: (
-    accumulator: K,
-    currentValue: T,
-    currentIndex?: number,
-    array?: T[]
-  ) => K,
-  initial?: K
-): K => {
-  let result = initial;
-
-  for (let i = 0; i < array.length; i++) {
-    result = callback(result, array[i]);
-  }
-
-  return result;
-};
-
-export const reduceFn2 = <T, K>(
-  array: T[],
-  callback: (
     accumulator: T | K,
     currentValue: T,
     currentIndex?: number,
@@ -118,6 +99,7 @@ export const reduceFn2 = <T, K>(
   initial?: K
 ): K => {
   let i = initial ? 0 : 2;
+
   let result = initial ?? callback(array[0], array[1]);
 
   for (i; i < array.length; i++) {
