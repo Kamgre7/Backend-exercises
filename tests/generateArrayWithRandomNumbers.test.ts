@@ -29,7 +29,7 @@ describe('Test generateArrayWithRandomNumber fn', () => {
     expect(randomNumber(min, max)).toBeLessThanOrEqual(max);
   });
 
-  it('Should return array with length called in howManyNumbers variable', () => {
+  it('Should return an array with length called in howManyNumbers variable', () => {
     expect(numberArray).toHaveLength(howManyNumbers);
   });
 

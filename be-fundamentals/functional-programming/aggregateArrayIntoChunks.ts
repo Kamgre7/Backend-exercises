@@ -1,6 +1,7 @@
 const alphabet = 'abcdefghijklmnoprstuwxyz'.split('');
 
-const randomNumber = () => Math.floor(Math.random() * (7 - 4 + 1) + 4);
+const randomNumber = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1) + min);
 
 const sum = (array: number[]) => array.reduce((a, b) => a + b, 0);
 
@@ -12,7 +13,7 @@ const lengthOfAllChunks = (inputArrayLength: number): number[] => {
       chunksLength.length = 0;
     }
 
-    chunksLength.push(randomNumber());
+    chunksLength.push(randomNumber(4, 7));
   } while (sum(chunksLength) !== inputArrayLength);
 
   return chunksLength;
@@ -34,20 +35,3 @@ const aggregateIntoChunks = <T>(array: T[]): T[][] => {
 };
 
 export const chunks = aggregateIntoChunks(alphabet);
-
-// chunks:
-// [[a,b,c,d,e,f],[g,h,i,j,k],[l,m,n,o,p,r,s],[t,u,w,x,y,z]]
-
-// *************************** old result
-
-/* 
-    const chunksResult = [];
-  let counter = 0;
-
-  for (let i = 0; i < array.length; i) {
-    const singleChunk = array.slice(i, i + chunksIteration[counter]);
-    chunksResult.push(singleChunk);
-    i += chunksIteration[counter];
-    counter++;
-  }
- */
