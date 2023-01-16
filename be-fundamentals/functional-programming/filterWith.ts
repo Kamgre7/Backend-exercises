@@ -1,9 +1,9 @@
 import { dataObj } from './data';
 
-const checkPhrase = (sentence: string, phrase: RegExp): boolean =>
+export const checkPhrase = (sentence: string, phrase: RegExp): boolean =>
   phrase.test(sentence);
 
-function filterWith<T>(arr: T[], phrase: string): T[] {
+export function filterWith<T>(arr: T[], phrase: string): T[] {
   const phraseRegExp = new RegExp(phrase, 'gi');
 
   if (String(phrase).length <= 2) return [];
