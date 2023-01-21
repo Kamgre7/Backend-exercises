@@ -9,7 +9,7 @@ export const luhnAlgorithm = (cardNumber: string): boolean => {
 
       const doubledDigit = Number(curr) * 2;
 
-      if (String(doubledDigit).length > 1) {
+      if (doubledDigit > 9) {
         return (
           prev +
           String(doubledDigit)
