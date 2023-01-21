@@ -13,7 +13,7 @@ const bankCardNumberRequirements = {
     /^6(?:011\d{12}|5\d{14}|4[4-9]\d{13}|22(?:1(?:2[6-9]|[3-9]\d)|[2-8]\d{2}|9(?:[01]\d|2[0-5]))\d{10})$/,
 };
 
-const whitespaceRegExp = /[- ]/g;
+const whitespaceRegExp = /[.- ]/g;
 
 export function cardNumberCheck(card: string | number): cardVerification {
   const cardNumber =
