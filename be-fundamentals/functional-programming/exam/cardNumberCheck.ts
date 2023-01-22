@@ -13,7 +13,7 @@ const bankCardNumberRequirements = {
     /^6(?:011\d{12}|5\d{14}|4[4-9]\d{13}|22(?:1(?:2[6-9]|[3-9]\d)|[2-8]\d{2}|9(?:[01]\d|2[0-5]))\d{10})$/,
 };
 
-const whitespaceRegExp = /[.- ]/g;
+const whitespaceRegExp = /[- \.]/g;
 
 export function cardNumberCheck(card: string | number): cardVerification {
   const cardNumber =
@@ -21,9 +21,7 @@ export function cardNumberCheck(card: string | number): cardVerification {
       ? String(card).replace(whitespaceRegExp, '')
       : card.replace(whitespaceRegExp, '');
 
-  if (!parseInt(cardNumber, 10)) {
-    throw new Error('Invalid card number');
-  }
+  isInteger(cardNumber);
 
   if (!luhnAlgorithm(cardNumber)) {
     return {
@@ -31,17 +29,30 @@ export function cardNumberCheck(card: string | number): cardVerification {
     };
   }
 
-  for (const [key, value] of Object.entries(bankCardNumberRequirements)) {
-    if (value.test(cardNumber)) {
-      return {
-        isLegal: true,
-        bank: key,
-      };
-    }
-  }
+  const bank = whichBank(cardNumber);
 
-  return {
-    isLegal: true,
-    bank: 'Bank not in database',
-  };
+  return bank !== null
+    ? {
+        isLegal: true,
+        bank,
+      }
+    : {
+        isLegal: true,
+        bank: 'Bank not in database',
+      };
+}
+
+function isInteger(cardNumber: string): void {
+  if (!parseInt(cardNumber, 10)) {
+    throw new Error('Invalid card number');
+  }
+}
+
+function whichBank(cardNumber: string): string | null {
+  const findBank =
+    Object.entries(bankCardNumberRequirements).find(([, regExp]) =>
+      regExp.test(cardNumber)
+    ) ?? null;
+
+  return findBank !== null ? findBank[0] : null;
 }
