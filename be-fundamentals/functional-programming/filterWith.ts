@@ -3,13 +3,48 @@ import { dataObj } from './data';
 export const checkPhrase = (sentence: string, phrase: RegExp): boolean =>
   phrase.test(sentence);
 
-export function filterWith<T>(arr: T[], phrase: string): T[] {
+export const findPhraseInWord = <T>(array: T[], phrase: RegExp): boolean => {
+  return array.some((element) => {
+    if (Array.isArray(element)) return findPhraseInWord(element, phrase);
+    else if (typeof element === 'object')
+      return findPhraseInWord(Object.values(element), phrase);
+
+    return phrase.test(String(element));
+  });
+};
+
+export function filterWith<T extends Object>(arr: T[], phrase: string): T[] {
   const phraseRegExp = new RegExp(phrase, 'gi');
 
   if (String(phrase).length <= 2) return [];
 
-  const filteredArr = arr.filter((element) => {
-    if (typeof element === 'object') {
+  const filteredArr = arr.filter(<K>(element: T) => {
+    const objValues: K[] = Object.values(element);
+
+    return findPhraseInWord(objValues, phraseRegExp);
+  });
+
+  return filteredArr;
+}
+
+export const result = filterWith(dataObj, 'Cummings Baxter');
+export const result2 = filterWith(dataObj, 'nisi');
+export const result3 = filterWith(dataObj, 'Delacruz Acevedo');
+
+/*  return array.some((element) =>
+    typeof element === 'object'
+      ? findPhraseInArray(Object.values(element), phrase)
+      : phrase.test(String(element))
+  ); */
+
+/* 
+    return objValues.some((value) => {
+      if (Array.isArray(value)) return findPhraseInArray(value, phraseRegExp);
+
+      return checkPhrase(String(value), phraseRegExp);
+    }); */
+
+/*   if (typeof element === 'object') {
       let result = false;
 
       for (const value of Object.values(element)) {
@@ -25,12 +60,6 @@ export function filterWith<T>(arr: T[], phrase: string): T[] {
       return checkPhrase(String(element), phraseRegExp);
     } else if (Array.isArray(element)) {
       return filterWith(element, phrase).length > 0;
-    }
-  });
+    } 
 
-  return filteredArr;
-}
-
-export const result = filterWith(dataObj, 'Delacruz Acevedo');
-export const result2 = filterWith(dataObj, 'Cummings Baxter');
-export const result3 = filterWith(dataObj, 'nisi');
+    return result;*/
