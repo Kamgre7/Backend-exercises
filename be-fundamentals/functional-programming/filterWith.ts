@@ -3,15 +3,16 @@ import { dataObj } from './data';
 export const checkPhrase = (sentence: string, phrase: RegExp): boolean =>
   phrase.test(sentence);
 
-export const findPhraseInWord = <T>(array: T[], phrase: RegExp): boolean => {
-  return array.some((element) => {
-    if (Array.isArray(element)) return findPhraseInWord(element, phrase);
-    else if (typeof element === 'object')
+export const findPhraseInWord = <T>(array: T[], phrase: RegExp): boolean =>
+  array.some((element) => {
+    if (Array.isArray(element)) {
+      return findPhraseInWord(element, phrase);
+    } else if (typeof element === 'object') {
       return findPhraseInWord(Object.values(element), phrase);
+    }
 
-    return phrase.test(String(element));
+    return checkPhrase(String(element), phrase);
   });
-};
 
 export function filterWith<T extends Object>(arr: T[], phrase: string): T[] {
   const phraseRegExp = new RegExp(phrase, 'gi');
