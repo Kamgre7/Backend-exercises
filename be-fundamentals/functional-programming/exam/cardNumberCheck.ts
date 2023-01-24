@@ -5,6 +5,10 @@ type cardVerification = {
   bank?: string;
 };
 
+interface cardNumberVerification {
+  [bank: string]: RegExp;
+}
+
 const bankCardNumberRequirements = {
   Mastercard: /^5[1-5]\d{14}$/,
   Visa: /^4\d{12}(?:\d{3})?$/,
@@ -29,7 +33,7 @@ export function cardNumberCheck(card: string | number): cardVerification {
     };
   }
 
-  const bank = whichBank(cardNumber);
+  const bank = whichBank(cardNumber, bankCardNumberRequirements);
 
   return bank !== null
     ? {
@@ -48,9 +52,12 @@ function isInteger(cardNumber: string): void {
   }
 }
 
-function whichBank(cardNumber: string): string | null {
+function whichBank(
+  cardNumber: string,
+  bankRequirements: cardNumberVerification
+): string | null {
   const findBank =
-    Object.entries(bankCardNumberRequirements).find(([, regExp]) =>
+    Object.entries(bankRequirements).find(([, regExp]) =>
       regExp.test(cardNumber)
     ) ?? null;
 
