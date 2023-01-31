@@ -2,9 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { customHeaders, HttpServiceInterface } from './types';
 
 class HttpService implements HttpServiceInterface {
-  protected axios: AxiosInstance = axios.create();
-
-  constructor() {}
+  private axios: AxiosInstance = axios.create();
 
   async get<T>(link: string, headers: customHeaders = {}): Promise<T> {
     return await this.axios.get(link, { headers });
@@ -38,28 +36,28 @@ class Decorator implements HttpServiceInterface {
   }
 
   async get<T>(link: string, headers: customHeaders = {}): Promise<T> {
-    return this.httpService.get(link, headers);
+    return await this.httpService.get(link, headers);
   }
 
-  post<T, K>(
+  async post<T, K>(
     link: string,
     data: K | {} = {},
     headers: customHeaders = {}
   ): Promise<T> {
-    return this.httpService.post(link, data, headers);
+    return await this.httpService.post(link, data, headers);
   }
 
-  delete<T, K>(
+  async delete<T, K>(
     link: string,
     data: K | {} = {},
     headers: customHeaders = {}
   ): Promise<T> {
-    return this.httpService.delete(link, data, headers);
+    return await this.httpService.delete(link, data, headers);
   }
 }
 
-class CacheService extends Decorator {
-  cacheArray: string[] = [];
+class CacheService<T> extends Decorator {
+  cacheArray: any[] = [];
 
   constructor(httpService: HttpServiceInterface) {
     super(httpService);
@@ -75,13 +73,15 @@ class CacheService extends Decorator {
       checkLink;
     }
 
-    const result: Promise<T> = this.httpService.get(link, headers);
+    const result: T = await this.httpService.get(link, headers);
+    this.cacheArray.push(result);
 
     return result;
   }
 }
 
-const exampleLink = new HttpService();
-const service = new CacheService(exampleLink);
+const httpServiceExample = new HttpService();
+const serviceCache = new CacheService(httpServiceExample);
 
-service.get('http://example.com');
+httpServiceExample.get('http://example.com');
+serviceCache.get('http://example.com');
