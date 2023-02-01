@@ -1,45 +1,45 @@
 import axios, { AxiosInstance } from 'axios';
 import { customHeaders, HttpServiceInterface } from './types';
 
-class HttpService implements HttpServiceInterface {
-  private axios: AxiosInstance = axios.create();
+class HttpService<T, K> implements HttpServiceInterface<T, K> {
+  private axiosInstance: AxiosInstance = axios.create();
 
-  async get<T>(link: string, headers: customHeaders = {}): Promise<T> {
-    return await this.axios.get(link, { headers });
+  async get(link: string, headers: customHeaders = {}): Promise<T> {
+    return await this.axiosInstance.get(link, { headers });
   }
 
-  async post<T, K>(
+  async post(
     link: string,
     data: K | {} = {},
     headers: customHeaders = {}
   ): Promise<T> {
-    return await this.axios.post(link, data, { headers });
+    return await this.axiosInstance.post(link, data, { headers });
   }
 
-  async delete<T, K>(
+  async delete(
     link: string,
     data: K | {} = {},
     headers: customHeaders = {}
   ): Promise<T> {
-    return await this.axios.delete(link, {
+    return await this.axiosInstance.delete(link, {
       headers,
       data,
     });
   }
 }
 
-class Decorator implements HttpServiceInterface {
-  protected httpService: HttpServiceInterface;
+class Decorator<T, K> implements HttpServiceInterface<T, K> {
+  protected httpService: HttpServiceInterface<T, K>;
 
-  constructor(httpService: HttpServiceInterface) {
+  constructor(httpService: HttpServiceInterface<T, K>) {
     this.httpService = httpService;
   }
 
-  async get<T>(link: string, headers: customHeaders = {}): Promise<T> {
+  async get(link: string, headers: customHeaders = {}): Promise<T> {
     return await this.httpService.get(link, headers);
   }
 
-  async post<T, K>(
+  async post(
     link: string,
     data: K | {} = {},
     headers: customHeaders = {}
@@ -47,7 +47,7 @@ class Decorator implements HttpServiceInterface {
     return await this.httpService.post(link, data, headers);
   }
 
-  async delete<T, K>(
+  async delete(
     link: string,
     data: K | {} = {},
     headers: customHeaders = {}
@@ -56,25 +56,26 @@ class Decorator implements HttpServiceInterface {
   }
 }
 
-class CacheService<T> extends Decorator {
-  cacheArray: any[] = [];
+class CacheService<T, K> extends Decorator<T, K> {
+  cacheUrl = new Map<string, T>();
 
-  constructor(httpService: HttpServiceInterface) {
+  constructor(httpService: HttpServiceInterface<T, K>) {
     super(httpService);
   }
 
   private checkPage(link: string) {
-    return this.cacheArray.find((element) => element === link);
+    return this.cacheUrl.has(link);
   }
 
-  async get<T>(link: string, headers: customHeaders = {}): Promise<T> {
+  async get(link: string, headers: customHeaders = {}): Promise<T> {
     const checkLink = this.checkPage(link);
+
     if (checkLink) {
-      checkLink;
+      return this.cacheUrl.get(link);
     }
 
-    const result: T = await this.httpService.get(link, headers);
-    this.cacheArray.push(result);
+    const result = await this.httpService.get(link, headers);
+    this.cacheUrl.set(link, result);
 
     return result;
   }
@@ -85,3 +86,9 @@ const serviceCache = new CacheService(httpServiceExample);
 
 httpServiceExample.get('http://example.com');
 serviceCache.get('http://example.com');
+serviceCache.post(
+  'http://example.com',
+  { name: 'string' },
+  { 'X-example': 'example-header' }
+);
+serviceCache.delete('http://example.com');
