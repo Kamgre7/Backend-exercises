@@ -1,11 +1,13 @@
-export type customHeaders =
-  | {
-      [name: string]: string;
-    }
-  | {};
+import { AxiosResponse } from 'axios';
 
-export interface HttpServiceInterface<T, K> {
-  get(link: string, headers: customHeaders): Promise<T>;
-  post(link: string, data: K | {}, headers: customHeaders): Promise<T>;
-  delete(link: string, data: K | {}, headers: customHeaders): Promise<T>;
+export type customHeaders = Record<string, string>;
+
+export interface HttpServiceInterface<T> {
+  get(link: string, headers: customHeaders): Promise<AxiosResponse>;
+  post(link: string, data?: T, headers?: customHeaders): Promise<AxiosResponse>;
+  delete(
+    link: string,
+    data?: T,
+    headers?: customHeaders
+  ): Promise<AxiosResponse>;
 }

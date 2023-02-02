@@ -1,94 +1,27 @@
-import axios, { AxiosInstance } from 'axios';
-import { customHeaders, HttpServiceInterface } from './types';
+import { CacheService } from './cacheService-class';
+import { HttpService } from './httpService-class';
 
-class HttpService<T, K> implements HttpServiceInterface<T, K> {
-  private axiosInstance: AxiosInstance = axios.create();
+// dodać config do axiosInstance - przy tworzeniu mozliwosc dodania konfig np baseURL
+// sam return - nei musi byc await
+// podzielic na osobne pliki
+// testy -
+// header i body zawsze opcjonalnie
+// dodac env - sprawdzic pod klucz i z danymi
 
-  async get(link: string, headers: customHeaders = {}): Promise<T> {
-    return await this.axiosInstance.get(link, { headers });
-  }
+// typy poprawic, usunac await
 
-  async post(
-    link: string,
-    data: K | {} = {},
-    headers: customHeaders = {}
-  ): Promise<T> {
-    return await this.axiosInstance.post(link, data, { headers });
-  }
+// test dzialania metod - czy zwraca odpowiednie dane
+// cacheUrl - zrobić jako osobny plik i z niego pobie, ra dane, podawany w konstruktorze
 
-  async delete(
-    link: string,
-    data: K | {} = {},
-    headers: customHeaders = {}
-  ): Promise<T> {
-    return await this.axiosInstance.delete(link, {
-      headers,
-      data,
-    });
-  }
-}
+const httpClient = new HttpService();
+const requestCacheService = new CacheService(httpClient);
 
-class Decorator<T, K> implements HttpServiceInterface<T, K> {
-  protected httpService: HttpServiceInterface<T, K>;
+httpClient.get('http://example.com');
 
-  constructor(httpService: HttpServiceInterface<T, K>) {
-    this.httpService = httpService;
-  }
-
-  async get(link: string, headers: customHeaders = {}): Promise<T> {
-    return await this.httpService.get(link, headers);
-  }
-
-  async post(
-    link: string,
-    data: K | {} = {},
-    headers: customHeaders = {}
-  ): Promise<T> {
-    return await this.httpService.post(link, data, headers);
-  }
-
-  async delete(
-    link: string,
-    data: K | {} = {},
-    headers: customHeaders = {}
-  ): Promise<T> {
-    return await this.httpService.delete(link, data, headers);
-  }
-}
-
-class CacheService<T, K> extends Decorator<T, K> {
-  cacheUrl = new Map<string, T>();
-
-  constructor(httpService: HttpServiceInterface<T, K>) {
-    super(httpService);
-  }
-
-  private checkPage(link: string) {
-    return this.cacheUrl.has(link);
-  }
-
-  async get(link: string, headers: customHeaders = {}): Promise<T> {
-    const checkLink = this.checkPage(link);
-
-    if (checkLink) {
-      return this.cacheUrl.get(link);
-    }
-
-    const result = await this.httpService.get(link, headers);
-    this.cacheUrl.set(link, result);
-
-    return result;
-  }
-}
-
-const httpServiceExample = new HttpService();
-const serviceCache = new CacheService(httpServiceExample);
-
-httpServiceExample.get('http://example.com');
-serviceCache.get('http://example.com');
-serviceCache.post(
+requestCacheService.get('http://example.com');
+requestCacheService.post(
   'http://example.com',
   { name: 'string' },
-  { 'X-example': 'example-header' }
+  { 'X-example': 'asddsa' }
 );
-serviceCache.delete('http://example.com');
+requestCacheService.delete('http://example.com');
