@@ -1,8 +1,14 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  CreateAxiosDefaults,
+} from 'axios';
 import { customHeaders, HttpServiceInterface } from './types';
 
 export class HttpService<T> implements HttpServiceInterface<T> {
-  private axiosInstance: AxiosInstance = axios.create();
+  private axiosInstance: AxiosInstance = axios.create(this.config);
+
+  constructor(private config?: CreateAxiosDefaults) {}
 
   async get(link: string, headers?: customHeaders): Promise<AxiosResponse> {
     return this.axiosInstance.get(link, { headers });
@@ -13,7 +19,7 @@ export class HttpService<T> implements HttpServiceInterface<T> {
     data?: T,
     headers?: customHeaders
   ): Promise<AxiosResponse> {
-    return await this.axiosInstance.post(link, data, { headers });
+    return this.axiosInstance.post(link, data, { headers });
   }
 
   async delete(
@@ -21,7 +27,7 @@ export class HttpService<T> implements HttpServiceInterface<T> {
     data?: T,
     headers?: customHeaders
   ): Promise<AxiosResponse> {
-    return await this.axiosInstance.delete(link, {
+    return this.axiosInstance.delete(link, {
       headers,
       data,
     });

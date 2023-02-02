@@ -3,13 +3,17 @@ import { Decorator } from './decorator-class';
 import { customHeaders, HttpServiceInterface } from './types';
 
 export class CacheService<T> extends Decorator<T> {
-  private cacheUrl = new Map<string, AxiosResponse>();
+  private cacheUrl: Map<string, AxiosResponse>;
 
-  constructor(httpService: HttpServiceInterface<T>) {
+  constructor(
+    httpService: HttpServiceInterface<T>,
+    cacheUrlDb: Map<string, AxiosResponse>
+  ) {
     super(httpService);
+    this.cacheUrl = new Map<string, AxiosResponse>(cacheUrlDb);
   }
 
-  private checkPage(link: string) {
+  private checkPage(link: string): boolean {
     return this.cacheUrl.has(link);
   }
 
