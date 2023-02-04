@@ -28,15 +28,15 @@ describe('Testing httpModule task - using axios instance with design pattern Dec
   });
 
   describe('CacheService class', () => {
+    const httpClient = new HttpService();
+    const cacheUrlDb = new Map();
+    const newCacheService = new CacheService(httpClient, cacheUrlDb);
+
     it('Class should be defined', () => {
       expect(CacheService).toBeDefined();
     });
 
     it('Method get of httpService should be called 1 times, next call from cacheUrlDb', async () => {
-      const httpClient = new HttpService();
-      const cacheUrlDb = new Map();
-      const newCacheService = new CacheService(httpClient, cacheUrlDb);
-
       await newCacheService.get('http://example.com');
       await newCacheService.get('http://example.com');
 
@@ -44,11 +44,9 @@ describe('Testing httpModule task - using axios instance with design pattern Dec
     });
 
     it('Response should return { status: 200, data: urlLink }', async () => {
-      const cacheUrlDb = new Map();
-      const httpClient = new HttpService();
-      const newCacheService = new CacheService(httpClient, cacheUrlDb);
+      const response = await newCacheService.get('http://example.com');
 
-      expect(await newCacheService.get('http://example.com')).toStrictEqual({
+      expect(response).toStrictEqual({
         status: 200,
         data: 'http://example.com',
       });
