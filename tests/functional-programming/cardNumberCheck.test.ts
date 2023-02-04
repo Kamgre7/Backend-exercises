@@ -1,5 +1,5 @@
-import { cardNumberCheck } from '../be-fundamentals/functional-programming/exam/cardNumberCheck';
-import { luhnAlgorithm } from '../be-fundamentals/functional-programming/exam/luhnAlgorithm';
+import { cardNumberCheck } from '../../be-fundamentals/functional-programming/exam/cardNumberCheck';
+import { luhnAlgorithm } from '../../be-fundamentals/functional-programming/exam/luhnAlgorithm';
 
 const creditCardBankResult = {
   visa: { isLegal: true, bank: 'Visa' },

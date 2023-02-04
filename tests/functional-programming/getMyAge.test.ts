@@ -1,7 +1,7 @@
 import {
   getMyAge,
   validationAge,
-} from '../be-fundamentals/functional-programming/getMyAge';
+} from '../../be-fundamentals/functional-programming/getMyAge';
 
 const currentYear = new Date().getFullYear();
 

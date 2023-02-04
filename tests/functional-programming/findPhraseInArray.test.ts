@@ -1,4 +1,4 @@
-import { findPhraseInArray } from '../be-fundamentals/functional-programming/findPhraseInArray-easy';
+import { findPhraseInArray } from '../../be-fundamentals/functional-programming/findPhraseInArray-easy';
 
 const inputData = [
   'create',

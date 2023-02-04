@@ -1,4 +1,4 @@
-import { aggregateIntoChunks } from '../be-fundamentals/functional-programming/aggregateArrayIntoChunks';
+import { aggregateIntoChunks } from '../../be-fundamentals/functional-programming/aggregateArrayIntoChunks';
 
 const alphabet = 'abcdefghijklmnoprstuwxyz'.split('');
 const alphabetChunks = aggregateIntoChunks(alphabet);

@@ -2,7 +2,7 @@ import {
   generateArrayOfArrays,
   generateArrayWithRandomNumbers,
   randomNumber,
-} from '../be-fundamentals/functional-programming/generateArrayWithRandomNumbers-easy';
+} from '../../be-fundamentals/functional-programming/generateArrayWithRandomNumbers-easy';
 
 const min = 0;
 const max = 10;

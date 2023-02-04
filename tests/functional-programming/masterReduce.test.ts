@@ -1,30 +1,21 @@
 import {
   everyFn,
   filterFn,
-  forEachFn,
   mapFn,
-  reduceFn,
   someFn,
-} from '../be-fundamentals/functional-programming/arrayMethods-medium';
+} from '../../be-fundamentals/functional-programming/masterReduce';
 
 const numberArray = [1, 2, 3, 4, 5];
-const mappedArray = [2, 4, 6, 8, 10];
+const numberArrMultipliedByTwo = [2, 4, 6, 8, 10];
 const evenNumberArray = [2, 4];
 const oddNumberArray = [1, 3];
+const mappedArray = mapFn(numberArray, (element) => element * 2);
 
-describe('Test array methods: forEach, filter, map, reduce, every, some using for loop, need to provide 2 parameters: array and cb ', () => {
-  describe('forEach', () => {
-    it('Should return undefined', () => {
-      expect(
-        forEachFn(numberArray, (element, indexElement) => element)
-      ).toBeUndefined();
-    });
-  });
-
-  describe('map method', () => {
+describe('Test array methods: map, filter, every, some using .reduce method', () => {
+  describe('array.map', () => {
     it('Should return array of numbers multiplied by 2', () => {
       expect(mapFn(numberArray, (element) => element * 2)).toStrictEqual(
-        mappedArray
+        numberArrMultipliedByTwo
       );
     });
 
@@ -33,29 +24,29 @@ describe('Test array methods: forEach, filter, map, reduce, every, some using fo
         numberArray.length
       );
     });
+
+    it('All elements in new array should be number type', () => {
+      expect(
+        mappedArray.every((element) => typeof element === 'number')
+      ).toBeTruthy();
+    });
   });
 
-  describe('filter method', () => {
+  describe('array.filter', () => {
     it('Should return array of even numbers', () => {
       expect(
         filterFn(numberArray, (element) => element % 2 === 0)
       ).toStrictEqual(evenNumberArray);
     });
-  });
 
-  describe('reduce method', () => {
-    it('Should return sum of numbers in array - with initial parameter', () => {
-      expect(reduceFn(numberArray, (prev, curr) => prev + curr, 0)).toBe(15);
-    });
-
-    it('Should return sum of numbers in array - without initial parameter', () => {
+    it('Should return array of odd numbers', () => {
       expect(
-        reduceFn(numberArray, (prev, curr) => Number(prev) + Number(curr))
-      ).toBe(15);
+        filterFn(numberArray, (element) => element % 2 !== 0)
+      ).toStrictEqual(oddNumberArray);
     });
   });
 
-  describe('every method', () => {
+  describe('array.every', () => {
     it('Should return true - all elements of array are even numbers', () => {
       expect(
         everyFn(evenNumberArray, (element) => element % 2 === 0)
@@ -63,18 +54,18 @@ describe('Test array methods: forEach, filter, map, reduce, every, some using fo
     });
 
     it('Should return false - all elements of array are not even numbers', () => {
-      expect(everyFn(numberArray, (element) => element % 2 === 0)).toBeFalsy();
+      expect(everyFn(numberArray, (element) => element % 2 !== 0)).toBeFalsy();
     });
   });
 
-  describe('some method', () => {
+  describe('array.some', () => {
     it('Should return true - some elements are even number', () => {
       expect(someFn(numberArray, (element) => element % 2 === 0)).toBeTruthy();
     });
 
     it('Should return false - none element is even number', () => {
       expect(
-        someFn(oddNumberArray, (element) => element % 2 === 0)
+        everyFn(oddNumberArray, (element) => element % 2 === 0)
       ).toBeFalsy();
     });
   });

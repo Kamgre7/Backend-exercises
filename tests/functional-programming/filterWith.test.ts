@@ -1,7 +1,7 @@
 import {
   checkPhrase,
   filterWith,
-} from '../be-fundamentals/functional-programming/filterWith';
+} from '../../be-fundamentals/functional-programming/filterWith';
 
 const data = [
   {
