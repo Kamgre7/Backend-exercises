@@ -10,7 +10,7 @@ export class CacheService<T> extends Decorator<T> {
     cacheUrlDb: Map<string, AxiosResponse>
   ) {
     super(httpService);
-    this.cacheUrl = new Map<string, AxiosResponse>(cacheUrlDb);
+    this.cacheUrl = cacheUrlDb;
   }
 
   private checkPage(link: string): boolean {
