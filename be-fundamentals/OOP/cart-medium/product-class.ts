@@ -1,12 +1,12 @@
 import { v4 as uuid } from 'uuid';
-import { ProductInformation, SingleProduct } from './types';
+import { Discounts, ProductInformation, SingleProduct } from './types';
 
 export class Product implements ProductInformation {
   id: string;
   name: string;
   category: string;
   price: number;
-  discount: number = 0;
+  discount: Discounts = Discounts.NO_DISCOUNT;
 
   constructor(product: SingleProduct) {
     this.id = uuid();
@@ -17,7 +17,7 @@ export class Product implements ProductInformation {
     return this.price - this.price * this.discount;
   }
 
-  setDiscount(discount: number) {
+  setDiscount(discount: Discounts) {
     this.discount = discount;
   }
 
