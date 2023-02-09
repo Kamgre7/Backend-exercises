@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 
 export class ShopSystem {
   private static instance: ShopSystem;
-  private id: string = uuid();
+  readonly id: string = uuid();
 
   private constructor() {}
 
