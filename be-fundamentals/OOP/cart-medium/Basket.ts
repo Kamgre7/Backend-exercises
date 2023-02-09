@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { Product } from './product-class';
+import { Product } from './Product';
 import { Discounts } from './types';
 
 export interface BasketInformation {
@@ -7,18 +7,19 @@ export interface BasketInformation {
   productList: BasketProduct[];
   discount: number;
   addProduct(item: BasketProduct): void;
+  sumBasket(): number;
+  setDiscount(discount: Discounts): void;
   removeProduct(id: string): void;
   removeAllProducts(): void;
-  sumBasketPrice(): number;
 }
 
 export type BasketProduct = {
   product: Product;
-  quantity: number;
+  amount: number;
 };
 
 export class Basket implements BasketInformation {
-  id: string;
+  readonly id: string;
   productList: BasketProduct[] = [];
   discount: Discounts = Discounts.NO_DISCOUNT;
 
@@ -27,16 +28,23 @@ export class Basket implements BasketInformation {
   }
 
   addProduct(item: BasketProduct): void {
-    this.productList.push(item);
+    this.checkIfNotQuantityBelowZero(item.amount);
+    this.checkIfNotGraterThanStock(item.amount, item.product.quantity);
+
+    const duplicatedProductIndex = this.findDuplicatedProduct(item);
+
+    !duplicatedProductIndex
+      ? this.productList.push(item)
+      : this.increaseProductInBasketAmount(item, duplicatedProductIndex);
   }
 
-  sumBasketPrice(): number {
-    const sumProductPrice = this.productList.reduce(
-      (prev, curr) => prev + curr.product.finalPrice(),
+  sumBasket(): number {
+    const basketValue = this.productList.reduce(
+      (prev, curr) => prev + curr.product.finalPrice() * curr.amount,
       0
     );
 
-    return sumProductPrice - sumProductPrice * this.discount;
+    return basketValue - basketValue * this.discount;
   }
 
   setDiscount(discount: Discounts) {
@@ -51,5 +59,42 @@ export class Basket implements BasketInformation {
 
   removeAllProducts(): void {
     this.productList.length = 0;
+  }
+
+  private findDuplicatedProduct(item: BasketProduct): number {
+    return this.productList.findIndex(
+      (basketItem) => basketItem.product.id === item.product.id
+    );
+  }
+
+  private increaseProductInBasketAmount(
+    item: BasketProduct,
+    index: number
+  ): void {
+    const sumAmountOfProduct = item.amount + this.productList[index].amount;
+
+    this.checkIfNotGraterThanStock(sumAmountOfProduct, item.product.quantity);
+
+    this.productList[index] = {
+      ...this.productList[index],
+      amount: sumAmountOfProduct,
+    };
+  }
+
+  private checkIfNotQuantityBelowZero(quantity: number): void {
+    if (quantity <= 0) {
+      throw new Error(`Cannot add item with quantity less than zero`);
+    }
+  }
+
+  private checkIfNotGraterThanStock(
+    quantity: number,
+    productInStock: number
+  ): void {
+    if (quantity > productInStock) {
+      throw new Error(
+        `Cannot add item with quantity grater than product stock`
+      );
+    }
   }
 }
