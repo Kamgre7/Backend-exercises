@@ -12,6 +12,8 @@ export interface ProductInformation {
   setName(newName: string): void;
   setPrice(newPrice: number): void;
   setCategory(newCategory: string): void;
+  setQuantity(newQuantity: number): void;
+  restockQuantity(howManyLess: number): void;
 }
 
 export type SingleProduct = {
@@ -65,6 +67,10 @@ export class Product implements ProductInformation {
   setQuantity(newQuantity: number): void {
     this.checkIfNotBelowZero(newQuantity, 'quantity');
     this.quantity = newQuantity;
+  }
+
+  restockQuantity(howManyLess: number) {
+    this.quantity -= howManyLess;
   }
 
   private validateNewProduct(data: SingleProduct): void {
