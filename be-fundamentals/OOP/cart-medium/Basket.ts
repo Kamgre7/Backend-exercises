@@ -27,17 +27,6 @@ export class Basket implements BasketInformation {
     this.id = uuid();
   }
 
-  addProduct(item: BasketProduct): void {
-    this.checkIfNotQuantityBelowZero(item.amount);
-    this.checkIfNotGraterThanStock(item.amount, item.product.quantity);
-
-    const duplicatedProductIndex = this.findDuplicatedProduct(item);
-
-    !duplicatedProductIndex
-      ? this.productList.push(item)
-      : this.increaseProductInBasketAmount(item, duplicatedProductIndex);
-  }
-
   sumBasket(): number {
     const basketValue = this.productList.reduce(
       (prev, curr) => prev + curr.product.finalPrice() * curr.amount,
@@ -45,6 +34,17 @@ export class Basket implements BasketInformation {
     );
 
     return basketValue - basketValue * this.discount;
+  }
+
+  addProduct(item: BasketProduct): void {
+    this.checkIfNotQuantityBelowZero(item.amount);
+    this.checkIfNotGraterThanStock(item.amount, item.product.quantity);
+
+    const duplicatedProductIndex = this.findDuplicatedProduct(item);
+
+    !!duplicatedProductIndex
+      ? this.productList.push(item)
+      : this.increaseProductInBasketAmount(item, duplicatedProductIndex);
   }
 
   setDiscount(discount: Discounts) {
