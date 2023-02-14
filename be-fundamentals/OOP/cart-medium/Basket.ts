@@ -42,7 +42,7 @@ export class Basket implements BasketInformation {
 
     const duplicatedProductIndex = this.findDuplicatedProduct(item);
 
-    !!duplicatedProductIndex
+    duplicatedProductIndex === -1
       ? this.productList.push(item)
       : this.increaseProductInBasketAmount(item, duplicatedProductIndex);
   }

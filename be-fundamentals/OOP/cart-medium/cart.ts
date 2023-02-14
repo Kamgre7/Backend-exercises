@@ -1,11 +1,15 @@
-import { Product } from './product-class';
+import { Basket } from './Basket';
+import { car } from './productExampleDB';
+import { ShopSystem } from './Shop-system';
 
-enum Discounts {}
+ShopSystem.getInstance();
 
-class ShopSystem {}
+const cart = new Basket();
 
-export const phone = new Product({
-  name: 'phone',
-  category: 'smartphone',
-  price: 10,
-});
+cart.addProduct({ product: car, amount: 8 });
+
+ShopSystem.finalizeOrder(cart);
+
+console.log(ShopSystem.showFinalizedOrders());
+
+ShopSystem.showUsedDiscountCodes();

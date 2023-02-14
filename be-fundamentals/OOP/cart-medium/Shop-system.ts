@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { Basket } from './Basket';
 import { Product } from './Product';
 import { shopCategoryDb, shopProductDb } from './productExampleDB';
+import { Discounts } from './types';
 import { currentDate } from './utils';
 
 interface SingleFinalizedOrder {
@@ -17,7 +18,7 @@ export class ShopSystem {
   private static products: Product[] = shopProductDb;
   private static finalizedOrderList = new Map<string, SingleFinalizedOrder>();
   private static categories: string[] = shopCategoryDb;
-  private static usedDiscountCodes: [];
+  private static usedDiscountCodes: string[] = [];
 
   private constructor() {}
 
@@ -33,6 +34,8 @@ export class ShopSystem {
     ShopSystem.restockProductQuantity(cart);
 
     ShopSystem.finalizedOrderList.set(cart.id, { cart, date: currentDate() });
+
+    ShopSystem.addUsedCode(cart.discount);
   }
 
   static showProducts(): Product[] {
@@ -65,6 +68,14 @@ export class ShopSystem {
     return [...this.finalizedOrderList];
   }
 
+  static showUsedDiscountCodes() {
+    return this.usedDiscountCodes;
+  }
+
+  private static addUsedCode(discount: number) {
+    ShopSystem.usedDiscountCodes.push(Discounts[discount]);
+  }
+
   private static restockProductQuantity(cart: Basket): void {
     cart.productList.forEach((cartItem) => {
       const index = ShopSystem.products.findIndex(
@@ -75,5 +86,3 @@ export class ShopSystem {
     });
   }
 }
-
-// Discounts[Discounts.FIFTY_PERCENT_DISCOUNT];
