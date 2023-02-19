@@ -20,11 +20,10 @@ export type SingleProduct = {
 };
 
 export class Product implements IProduct {
-  readonly id: string;
+  public readonly id: string;
   name: string;
   category: string;
   price: number;
-  quantity: number;
   discount: Discounts = Discounts.NO_DISCOUNT;
 
   constructor({ name, price, category }: SingleProduct) {
