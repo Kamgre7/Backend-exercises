@@ -1,5 +1,6 @@
 import { Product } from './Product';
 import { ProductStock } from './Shop-system';
+import { Discounts } from './types';
 
 export const car = new Product({
   name: 'Fiat',
@@ -45,4 +46,12 @@ export const shopCategoryDb: string[] = [
   'Smartphone',
   'Book',
   'Food',
+];
+
+export const discountsCodes: Discounts[] = [
+  Discounts.FIFTY_PERCENT_DISCOUNT,
+  Discounts.FORTY_PERCENT_DISCOUNT,
+  Discounts.THIRTY_PERCENT_DISCOUNT,
+  Discounts.TWENTY_PERCENT_DISCOUNT,
+  Discounts.TEN_PERCENT_DISCOUNT,
 ];
