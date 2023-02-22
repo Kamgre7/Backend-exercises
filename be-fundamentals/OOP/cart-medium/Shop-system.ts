@@ -164,7 +164,7 @@ export class ShopSystem {
     this.checkIfNotEqualBelowZero(product.amount);
     this.checkIfNotGraterThanStock(product.amount, productInStock.quantity);
 
-    cart.addProduct(product);
+    cart.addProduct(product, productInStock.quantity);
   }
 
   private findProduct(id: string): ProductStock | null {
