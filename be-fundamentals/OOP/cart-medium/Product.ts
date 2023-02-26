@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { Discounts } from './types';
-import { dataValidation } from './utils';
+import { DataValidation } from './utils';
 
 export interface IProduct {
   id: string;
@@ -41,27 +41,28 @@ export class Product implements IProduct {
   }
 
   setDiscount(discount: Discounts): void {
+    DataValidation.checkIfDiscountLessThanValue(discount);
     this.discount = discount;
   }
 
   setName(newName: string): void {
-    dataValidation.checkIfNotEmptyString(newName, 'name');
+    DataValidation.checkIfNotEmptyString(newName, 'name');
     this.name = newName;
   }
 
   setPrice(newPrice: number): void {
-    dataValidation.checkIfNotEqualOrBelowZero(newPrice, 'price');
+    DataValidation.checkIfNotEqualOrBelowZero(newPrice, 'price');
     this.price = newPrice;
   }
 
   setCategory(newCategory: string): void {
-    dataValidation.checkIfNotEmptyString(newCategory, 'category');
+    DataValidation.checkIfNotEmptyString(newCategory, 'category');
     this.category = newCategory;
   }
 
   private validateNewProduct(data: SingleProduct): void {
-    dataValidation.checkIfNotEqualOrBelowZero(data.price, 'price');
-    dataValidation.checkIfNotEmptyString(data.name, 'name');
-    dataValidation.checkIfNotEmptyString(data.category, 'category');
+    DataValidation.checkIfNotEqualOrBelowZero(data.price, 'price');
+    DataValidation.checkIfNotEmptyString(data.name, 'name');
+    DataValidation.checkIfNotEmptyString(data.category, 'category');
   }
 }
