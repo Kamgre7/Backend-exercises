@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { Discounts } from './types';
+import { dataValidation } from './utils';
 
 export interface IProduct {
   id: string;
@@ -44,38 +45,23 @@ export class Product implements IProduct {
   }
 
   setName(newName: string): void {
-    this.checkIfNotEmptyString(newName, 'name');
+    dataValidation.checkIfNotEmptyString(newName, 'name');
     this.name = newName;
   }
 
   setPrice(newPrice: number): void {
-    this.checkIfNotBelowZero(newPrice, 'price');
+    dataValidation.checkIfNotEqualOrBelowZero(newPrice, 'price');
     this.price = newPrice;
   }
 
   setCategory(newCategory: string): void {
-    this.checkIfNotEmptyString(newCategory, 'category');
+    dataValidation.checkIfNotEmptyString(newCategory, 'category');
     this.category = newCategory;
   }
 
   private validateNewProduct(data: SingleProduct): void {
-    this.checkIfNotBelowZero(data.price, 'price');
-
-    this.checkIfNotEmptyString(data.name, 'name');
-    this.checkIfNotEmptyString(data.category, 'category');
-  }
-
-  private checkIfNotBelowZero(amount: number, inputName: string): void {
-    if (amount <= 0) {
-      throw new Error(`Cannot add item with ${inputName} less than zero`);
-    }
-  }
-
-  private checkIfNotEmptyString(name: string, inputName: string): void {
-    const nameTrim = name.trim();
-
-    if (nameTrim.length === 0) {
-      throw new Error(`Cannot add item with empty ${inputName}`);
-    }
+    dataValidation.checkIfNotEqualOrBelowZero(data.price, 'price');
+    dataValidation.checkIfNotEmptyString(data.name, 'name');
+    dataValidation.checkIfNotEmptyString(data.category, 'category');
   }
 }
