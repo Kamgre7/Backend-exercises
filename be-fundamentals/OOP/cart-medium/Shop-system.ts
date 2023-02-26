@@ -3,7 +3,7 @@ import { Cart, CartProduct } from './Cart';
 import { Product } from './Product';
 import { discountsCodes, shopCategoryDb, shopProductDb } from './ShopSystemDB';
 import { Discounts } from './types';
-import { currentDate } from './utils';
+import { currentDate, DataValidation } from './utils';
 
 type SingleFinalizedOrder = {
   cart: Cart;
@@ -15,16 +15,19 @@ export type ProductStock = {
   quantity: number;
 };
 
-type OrderHistory = [string, SingleFinalizedOrder][];
+type ProductToCartData = {
+  productId: string;
+  amount: number;
+};
 
 export class ShopSystem {
   private static instance: ShopSystem;
-  private static products: ProductStock[] = shopProductDb;
-  private static finalizedOrderList = new Map<string, SingleFinalizedOrder>();
-  private static carts: Cart[] = [];
-  private static categories: string[] = shopCategoryDb;
-  private static usedDiscountCodes: string[] = [];
-  private static availableDiscountCodes: Discounts[] = discountsCodes;
+  products: ProductStock[] = shopProductDb;
+  finalizedOrderList = new Map<string, SingleFinalizedOrder>();
+  carts: Cart[] = [];
+  categories: string[] = shopCategoryDb;
+  usedDiscountCodes: string[] = [];
+  availableDiscountCodes: Discounts[] = discountsCodes;
 
   private constructor(public readonly id = uuid()) {}
 
@@ -37,19 +40,16 @@ export class ShopSystem {
   }
 
   showProducts(): ProductStock[] {
-    return ShopSystem.products;
+    return this.products;
   }
 
   addProduct(newProduct: ProductStock): void {
-    this.checkIfNotEqualBelowZero(newProduct.quantity);
-
-    ShopSystem.products.push(newProduct);
+    DataValidation.checkIfNotEqualOrBelowZero(newProduct.quantity, 'quantity');
+    this.products.push(newProduct);
   }
 
   removeProduct(id: string): void {
-    ShopSystem.products = ShopSystem.products.filter(
-      (item) => item.product.id !== id
-    );
+    this.products = this.products.filter((item) => item.product.id !== id);
   }
 
   setProductDiscount(id: string, discount: Discounts): void | string {
@@ -59,7 +59,9 @@ export class ShopSystem {
       return 'No product found!';
     }
 
-    item.product.setDiscount(discount);
+    if (this.checkDiscountCode(discount)) {
+      item.product.setDiscount(discount);
+    }
   }
 
   setProductName(id: string, newName: string) {
@@ -97,17 +99,16 @@ export class ShopSystem {
   }
 
   showCategories(): string[] {
-    return ShopSystem.categories;
+    return this.categories;
   }
 
   addCategory(newCategory: string): void {
-    this.checkIfNotEmptyString(newCategory);
-
-    ShopSystem.categories.push(newCategory);
+    DataValidation.checkIfNotEmptyString(newCategory, 'category');
+    this.categories.push(newCategory);
   }
 
   removeCategory(name: string): void {
-    ShopSystem.categories = ShopSystem.categories.filter(
+    this.categories = this.categories.filter(
       (category) => !category.includes(name)
     );
   }
@@ -123,103 +124,144 @@ export class ShopSystem {
       cart.setDiscount(Discounts.NO_DISCOUNT);
     }
 
-    this.restockProductQuantity(cart);
     this.addToOrderHistory(cart);
-    this.addUsedCodeToHistory(cart.discount);
+
+    if (cart.discount !== Discounts.NO_DISCOUNT) {
+      this.addUsedCodeToHistory(cart.discount);
+    }
+
     this.removeCart(cart.id);
   }
 
   addToOrderHistory(cart: Cart): void {
-    ShopSystem.finalizedOrderList.set(cart.id, { cart, date: currentDate() });
+    this.finalizedOrderList.set(cart.id, { cart, date: currentDate() });
   }
 
-  showFinalizedOrders(): OrderHistory {
-    return [...ShopSystem.finalizedOrderList];
+  showFinalizedOrders(): Map<string, SingleFinalizedOrder> {
+    return this.finalizedOrderList;
   }
 
   showUsedDiscountCodes(): string[] {
-    return ShopSystem.usedDiscountCodes;
+    return this.usedDiscountCodes;
   }
 
   showAvailableDiscountCodes(): string[] {
-    return Object.keys(ShopSystem.availableDiscountCodes);
+    return Object.keys(this.availableDiscountCodes);
   }
 
-  addCart(cart: Cart): void {
-    ShopSystem.carts.push(cart);
+  addCart(): string {
+    const newCart = new Cart();
+    this.carts.push(newCart);
+
+    return newCart.id;
   }
 
-  addProductToCart(cartId: string, product: CartProduct): void | string {
+  addProductToCart(
+    cartId: string,
+    productToCart: ProductToCartData
+  ): void | string {
     const cart = this.findCart(cartId);
-    const productInStock = this.findProduct(product.product.id);
+    const productStock = this.findProduct(productToCart.productId);
 
     if (!cart) {
       return 'Cart not found';
     }
 
-    if (!productInStock) {
-      return 'Product not found';
+    if (!productStock) {
+      return 'Cart not found';
     }
 
-    this.checkIfNotEqualBelowZero(product.amount);
-    this.checkIfNotGraterThanStock(product.amount, productInStock.quantity);
+    this.checkIfNotGraterThanStock(productToCart.amount, productStock.quantity);
 
-    cart.addProduct(product, productInStock.quantity);
+    cart.addProduct({
+      product: productStock.product,
+      amount: productToCart.amount,
+    });
+
+    this.decreaseProductQuantity(productStock, productToCart.amount);
   }
 
-  private findProduct(id: string): ProductStock | null {
-    const product = ShopSystem.products.find((item) => item.product.id === id);
-    return product ? product : null;
+  setCartDiscount(cartId: string, discount: Discounts) {
+    const cart = this.findCart(cartId);
+
+    if (!cart) {
+      return 'Cart not found!';
+    }
+
+    if (this.checkDiscountCode(discount)) {
+      cart.setDiscount(discount);
+    }
   }
 
-  private findCategory(categoryName: string): boolean {
-    return ShopSystem.categories.some((category) => category === categoryName);
+  removeCart(id: string): void {
+    const cart = this.findCart(id);
+
+    if (cart.productList.length > 0) {
+      this.restockProductQuantity(cart);
+    }
+
+    this.carts = this.carts.filter((cart) => cart.id !== id);
   }
 
-  private checkDiscountCode(discount: number): boolean {
-    const availableCode = ShopSystem.availableDiscountCodes.find(
-      (code) => code === discount
-    );
+  removeProductFromCart(cartId: string, productId: string): void {
+    const cart = this.findCart(cartId);
 
-    return availableCode ? true : false;
+    cart.removeProduct(productId);
   }
 
-  private addUsedCodeToHistory(discount: number) {
-    ShopSystem.usedDiscountCodes.push(Discounts[discount]);
+  removeAllProductsFromCart(cartId: string): void {
+    const cart = this.findCart(cartId);
 
-    const index = ShopSystem.availableDiscountCodes.indexOf(discount);
-    ShopSystem.availableDiscountCodes.splice(index, 1);
-  }
-
-  private findCart(id: string): Cart | null {
-    const cart = ShopSystem.carts.find((cart) => cart.id === id);
-    return cart ? cart : null;
-  }
-
-  private removeCart(id: string): void {
-    ShopSystem.carts = ShopSystem.carts.filter((cart) => cart.id !== id);
+    cart.removeAllProducts;
   }
 
   private restockProductQuantity(cart: Cart): void {
     cart.productList.forEach((cartItem) => {
       const productToRestock = this.findProduct(cartItem.product.id);
-
-      productToRestock.quantity -= cartItem.amount;
+      this.increaseProductQuantity(productToRestock, cartItem.amount);
     });
   }
 
-  private checkIfNotEqualBelowZero(quantity: number): void {
-    if (quantity <= 0) {
-      throw new Error(`Cannot add item with quantity less than zero`);
-    }
+  private increaseProductQuantity(
+    product: ProductStock,
+    increaseQuantity: number
+  ) {
+    product.quantity += increaseQuantity;
   }
 
-  private checkIfNotEmptyString(name: string): void {
-    const nameTrim = name.trim();
+  private decreaseProductQuantity(
+    product: ProductStock,
+    decreaseQuantity: number
+  ) {
+    product.quantity -= decreaseQuantity;
+  }
 
-    if (nameTrim.length === 0) {
-      throw new Error(`Cannot add empty category`);
-    }
+  private findProduct(id: string): ProductStock | null {
+    const product = this.products.find((item) => item.product.id === id);
+    return product ? product : null;
+  }
+
+  private findCategory(categoryName: string): boolean {
+    return this.categories.some((category) => category === categoryName);
+  }
+
+  private checkDiscountCode(discount: number): boolean {
+    return this.availableDiscountCodes.some((code) => code === discount);
+  }
+
+  private addUsedCodeToHistory(discount: number) {
+    this.usedDiscountCodes.push(Discounts[discount]);
+
+    const discountIndex = this.availableDiscountCodes.indexOf(discount);
+
+    this.availableDiscountCodes = this.availableDiscountCodes.filter(
+      (discount, index) => index !== discountIndex
+    );
+  }
+
+  private findCart(id: string): Cart | null {
+    const cart = this.carts.find((cart) => cart.id === id);
+    return cart ? cart : null;
   }
 
   private checkIfNotGraterThanStock(
