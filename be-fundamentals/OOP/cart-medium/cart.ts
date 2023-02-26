@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { Product } from './Product';
 import { Discounts } from './types';
+import { DataValidation } from './utils';
 
 export interface ICart {
   id: string;
@@ -33,21 +34,18 @@ export class Cart implements ICart {
     return cartValue - cartValue * this.discount;
   }
 
-  addProduct(item: CartProduct, productInStockQuantity: number): void {
-    this.checkIfNotEqualBelowZero(item.amount);
+  addProduct(item: CartProduct): void {
+    DataValidation.checkIfNotEqualOrBelowZero(item.amount, 'amount');
 
     const duplicatedProduct = this.findDuplicatedProduct(item);
 
     duplicatedProduct === null
       ? this.productList.push(item)
-      : this.increaseProductCartAmount(
-          item,
-          duplicatedProduct,
-          productInStockQuantity
-        );
+      : this.increaseProductCartAmount(duplicatedProduct, item.amount);
   }
 
   setDiscount(discount: Discounts) {
+    DataValidation.checkIfDiscountLessThanValue(discount);
     this.discount = discount;
   }
 
@@ -61,7 +59,7 @@ export class Cart implements ICart {
     this.productList.length = 0;
   }
 
-  findDuplicatedProduct(item: CartProduct): CartProduct | null {
+  private findDuplicatedProduct(item: CartProduct): CartProduct | null {
     const productInCart = this.productList.find(
       (cartItem) => cartItem.product.id === item.product.id
     );
@@ -70,31 +68,9 @@ export class Cart implements ICart {
   }
 
   private increaseProductCartAmount(
-    item: CartProduct,
     productInCart: CartProduct,
-    productInStockQuantity: number
+    amountIncrease: number
   ): void {
-    const sumAmountOfProduct = item.amount + productInCart.amount;
-
-    this.checkIfNotGraterThanStock(sumAmountOfProduct, productInStockQuantity);
-
-    productInCart.amount = sumAmountOfProduct;
-  }
-
-  private checkIfNotGraterThanStock(
-    quantity: number,
-    productInStock: number
-  ): void {
-    if (quantity > productInStock) {
-      throw new Error(
-        `Cannot add item with quantity grater than product stock`
-      );
-    }
-  }
-
-  private checkIfNotEqualBelowZero(quantity: number): void {
-    if (quantity <= 0) {
-      throw new Error(`Cannot add item with quantity less than zero`);
-    }
+    productInCart.amount += amountIncrease;
   }
 }
