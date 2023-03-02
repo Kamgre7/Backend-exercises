@@ -1,6 +1,6 @@
-import { CacheService } from '../../be-fundamentals/OOP/httpModule/cacheService-class';
-import { HttpService } from '../../be-fundamentals/OOP/httpModule/httpService-class';
-import { HttpServiceInterface } from '../../be-fundamentals/OOP/httpModule/types';
+import { CacheService } from '../../../be-fundamentals/OOP/httpModule/cacheService-class';
+import { HttpService } from '../../../be-fundamentals/OOP/httpModule/httpService-class';
+import { HttpServiceInterface } from '../../../be-fundamentals/OOP/httpModule/types';
 
 const httpServiceMock: HttpServiceInterface<unknown> = {
   delete: jest.fn().mockResolvedValue('linkTest'),
