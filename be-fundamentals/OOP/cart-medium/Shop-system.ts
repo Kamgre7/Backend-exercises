@@ -1,9 +1,10 @@
 import { v4 as uuid } from 'uuid';
-import { Cart, CartProduct } from './Cart';
+import { Cart } from './Cart';
+import { DataValidator } from './DataValidator';
 import { Product } from './Product';
 import { discountsCodes, shopCategoryDb, shopProductDb } from './ShopSystemDB';
 import { Discounts } from './types';
-import { currentDate, DataValidation } from './utils';
+import { currentDate } from './utils';
 
 type SingleFinalizedOrder = {
   cart: Cart;
@@ -44,56 +45,36 @@ export class ShopSystem {
   }
 
   addProduct(newProduct: ProductStock): void {
-    DataValidation.checkIfNotEqualOrBelowZero(newProduct.quantity, 'quantity');
+    DataValidator.checkIfNotEqualOrBelowZero(newProduct.quantity, 'quantity');
     this.products.push(newProduct);
   }
 
   removeProduct(id: string): void {
+    this.findProduct(id);
     this.products = this.products.filter((item) => item.product.id !== id);
   }
 
-  setProductDiscount(id: string, discount: Discounts): void | string {
+  setProductDiscount(id: string, discount: Discounts): void {
     const item = this.findProduct(id);
-
-    if (!item) {
-      return 'No product found!';
-    }
 
     if (this.checkDiscountCode(discount)) {
       item.product.setDiscount(discount);
     }
   }
 
-  setProductName(id: string, newName: string) {
+  setProductName(id: string, newName: string): void {
     const item = this.findProduct(id);
-
-    if (!item) {
-      return 'No product found!';
-    }
-
     item.product.setName(newName);
   }
 
-  setProductPrice(id: string, newPrice: number) {
+  setProductPrice(id: string, newPrice: number): void {
     const item = this.findProduct(id);
-
-    if (!item) {
-      return 'No product found!';
-    }
-
     item.product.setPrice(newPrice);
   }
 
-  setProductCategory(id: string, newCategory: string) {
+  setProductCategory(id: string, newCategory: string): void {
     const item = this.findProduct(id);
-
-    if (!item) {
-      return 'No product found!';
-    }
-
-    if (!this.findCategory(newCategory)) {
-      return 'No category found!';
-    }
+    this.checkIfCategoryExist(newCategory);
 
     item.product.setCategory(newCategory);
   }
@@ -103,22 +84,20 @@ export class ShopSystem {
   }
 
   addCategory(newCategory: string): void {
-    DataValidation.checkIfNotEmptyString(newCategory, 'category');
+    DataValidator.checkIfNotEmptyString(newCategory, 'category');
     this.categories.push(newCategory);
   }
 
   removeCategory(name: string): void {
+    this.checkIfCategoryExist(name);
+
     this.categories = this.categories.filter(
       (category) => !category.includes(name)
     );
   }
 
-  finalizeOrder(cartId: string): void | string {
+  finalizeOrder(cartId: string): void {
     const cart = this.findCart(cartId);
-
-    if (!cart) {
-      return 'Cart not found';
-    }
 
     if (!this.checkDiscountCode(cart.discount)) {
       cart.setDiscount(Discounts.NO_DISCOUNT);
@@ -156,20 +135,9 @@ export class ShopSystem {
     return newCart.id;
   }
 
-  addProductToCart(
-    cartId: string,
-    productToCart: ProductToCartData
-  ): void | string {
+  addProductToCart(cartId: string, productToCart: ProductToCartData): void {
     const cart = this.findCart(cartId);
     const productStock = this.findProduct(productToCart.productId);
-
-    if (!cart) {
-      return 'Cart not found';
-    }
-
-    if (!productStock) {
-      return 'Cart not found';
-    }
 
     this.checkIfNotGraterThanStock(productToCart.amount, productStock.quantity);
 
@@ -181,41 +149,35 @@ export class ShopSystem {
     this.decreaseProductQuantity(productStock, productToCart.amount);
   }
 
-  setCartDiscount(cartId: string, discount: Discounts) {
+  setCartDiscount(cartId: string, discount: Discounts): void {
     const cart = this.findCart(cartId);
-
-    if (!cart) {
-      return 'Cart not found!';
-    }
 
     if (this.checkDiscountCode(discount)) {
       cart.setDiscount(discount);
     }
   }
 
-  removeCart(id: string): void {
-    const cart = this.findCart(id);
-
-    if (cart.productList.length > 0) {
-      this.restockProductQuantity(cart);
-    }
-
-    this.carts = this.carts.filter((cart) => cart.id !== id);
-  }
-
   removeProductFromCart(cartId: string, productId: string): void {
     const cart = this.findCart(cartId);
+    const itemAmountInCart = cart.findProductAmount(productId);
+    const productToRestock = this.findProduct(productId);
 
+    this.increaseProductQuantity(productToRestock, itemAmountInCart);
     cart.removeProduct(productId);
   }
 
   removeAllProductsFromCart(cartId: string): void {
     const cart = this.findCart(cartId);
 
-    cart.removeAllProducts;
+    this.restockProductInCartQuantity(cart);
+    cart.removeAllProducts();
   }
 
-  private restockProductQuantity(cart: Cart): void {
+  private removeCart(id: string): void {
+    this.carts = this.carts.filter((cart) => cart.id !== id);
+  }
+
+  private restockProductInCartQuantity(cart: Cart): void {
     cart.productList.forEach((cartItem) => {
       const productToRestock = this.findProduct(cartItem.product.id);
       this.increaseProductQuantity(productToRestock, cartItem.amount);
@@ -225,31 +187,44 @@ export class ShopSystem {
   private increaseProductQuantity(
     product: ProductStock,
     increaseQuantity: number
-  ) {
+  ): void {
     product.quantity += increaseQuantity;
   }
 
   private decreaseProductQuantity(
     product: ProductStock,
     decreaseQuantity: number
-  ) {
+  ): void {
     product.quantity -= decreaseQuantity;
   }
 
-  private findProduct(id: string): ProductStock | null {
+  private findProduct(id: string): ProductStock {
     const product = this.products.find((item) => item.product.id === id);
-    return product ? product : null;
+
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    return product;
   }
 
-  private findCategory(categoryName: string): boolean {
-    return this.categories.some((category) => category === categoryName);
+  private checkIfCategoryExist(categoryName: string): boolean {
+    const categoryExist = this.categories.some(
+      (category) => category === categoryName
+    );
+
+    if (!categoryExist) {
+      throw new Error('Categories not found');
+    }
+
+    return true;
   }
 
   private checkDiscountCode(discount: number): boolean {
     return this.availableDiscountCodes.some((code) => code === discount);
   }
 
-  private addUsedCodeToHistory(discount: number) {
+  private addUsedCodeToHistory(discount: number): void {
     this.usedDiscountCodes.push(Discounts[discount]);
 
     const discountIndex = this.availableDiscountCodes.indexOf(discount);
@@ -259,9 +234,14 @@ export class ShopSystem {
     );
   }
 
-  private findCart(id: string): Cart | null {
+  private findCart(id: string): Cart {
     const cart = this.carts.find((cart) => cart.id === id);
-    return cart ? cart : null;
+
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+
+    return cart;
   }
 
   private checkIfNotGraterThanStock(
@@ -275,6 +255,3 @@ export class ShopSystem {
     }
   }
 }
-
-const shopSystem = ShopSystem.getInstance();
-shopSystem.showProducts();
