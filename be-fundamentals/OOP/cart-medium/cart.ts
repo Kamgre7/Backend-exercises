@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
+import { DataValidator } from './DataValidator';
 import { Product } from './Product';
 import { Discounts } from './types';
-import { DataValidation } from './utils';
 
 export interface ICart {
   id: string;
@@ -35,7 +35,7 @@ export class Cart implements ICart {
   }
 
   addProduct(item: CartProduct): void {
-    DataValidation.checkIfNotEqualOrBelowZero(item.amount, 'amount');
+    DataValidator.checkIfNotEqualOrBelowZero(item.amount, 'amount');
 
     const duplicatedProduct = this.findDuplicatedProduct(item);
 
@@ -45,18 +45,38 @@ export class Cart implements ICart {
   }
 
   setDiscount(discount: Discounts) {
-    DataValidation.checkIfDiscountLessThanValue(discount);
+    DataValidator.checkIfDiscountLessThanValue(discount);
     this.discount = discount;
   }
 
-  removeProduct(id: string): void {
+  removeProduct(productId: string): void {
+    this.checkIfProductInCart(productId);
+
     this.productList = this.productList.filter(
-      (item) => item.product.id !== id
+      (item) => item.product.id !== productId
     );
   }
 
   removeAllProducts(): void {
     this.productList.length = 0;
+  }
+
+  findProductAmount(productId: string): number {
+    const product = this.productList.find(
+      (item) => item.product.id === productId
+    );
+
+    return product.amount;
+  }
+
+  private checkIfProductInCart(productId: string): void {
+    const isProductInCart = this.productList.some(
+      (item) => item.product.id === productId
+    );
+
+    if (!isProductInCart) {
+      throw new Error('Cannot find a product in cart');
+    }
   }
 
   private findDuplicatedProduct(item: CartProduct): CartProduct | null {
