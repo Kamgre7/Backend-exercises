@@ -16,7 +16,7 @@ export type ProductStock = {
   quantity: number;
 };
 
-type ProductToCartData = {
+export type ProductToCartData = {
   productId: string;
   amount: number;
 };
@@ -234,7 +234,7 @@ export class ShopSystem {
     );
   }
 
-  private findCart(id: string): Cart {
+  findCart(id: string): Cart {
     const cart = this.carts.find((cart) => cart.id === id);
 
     if (!cart) {
