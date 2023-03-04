@@ -6,6 +6,7 @@ import {
 } from '../../../be-fundamentals/OOP/cart-medium/Shop-system';
 import { Discounts } from '../../../be-fundamentals/OOP/cart-medium/types';
 
+let shopSystem: ShopSystem;
 let car: Product;
 let smartphone: Product;
 let book: Product;
@@ -14,6 +15,10 @@ let categoriesList: string[];
 let newCartId: string;
 let carToCart: ProductToCartData;
 let smartphoneToCart: ProductToCartData;
+
+beforeAll(() => {
+  shopSystem = ShopSystem.getInstance();
+});
 
 beforeEach(() => {
   car = new Product({
@@ -59,8 +64,6 @@ beforeEach(() => {
   };
 });
 
-const shopSystem = ShopSystem.getInstance();
-
 describe('ShopSystem', () => {
   it('Should be instance of ShopSystem class', () => {
     expect(shopSystem).toBeInstanceOf(ShopSystem);
@@ -76,51 +79,51 @@ describe('ShopSystem', () => {
       expect(shopSystem.showProducts()).toStrictEqual(productsList);
     });
 
-    it('Should add book to products list', () => {
+    it('Should add product to products list', () => {
       shopSystem.addProduct({
         product: book,
         quantity: 5,
       });
 
-      expect(shopSystem.showProducts()).toContainEqual({
+      expect(shopSystem.products).toContainEqual({
         product: book,
         quantity: 5,
       });
     });
 
-    it('Should remove car from products list', () => {
-      expect(shopSystem.showProducts()).toContainEqual({
+    it('Should remove product from products list', () => {
+      expect(shopSystem.products).toContainEqual({
         product: car,
         quantity: 10,
       });
 
       shopSystem.removeProduct(car.id);
 
-      expect(shopSystem.showProducts()).not.toContainEqual({
+      expect(shopSystem.products).not.toContainEqual({
         product: car,
         quantity: 10,
       });
     });
 
-    it('Should change car discount - default 0', () => {
+    it('Should change product discount - default 0', () => {
       shopSystem.setProductDiscount(car.id, Discounts.TEN_PERCENT_DISCOUNT);
 
       expect(car.discount).toBe(Discounts.TEN_PERCENT_DISCOUNT);
     });
 
-    it('Should change car name', () => {
+    it('Should change product name', () => {
       shopSystem.setProductName(car.id, 'fast-car');
 
       expect(car.name).toBe('fast-car');
     });
 
-    it('Should change car price', () => {
+    it('Should change product price', () => {
       shopSystem.setProductPrice(car.id, 10);
 
       expect(car.price).toBe(10);
     });
 
-    it('Should change car category', () => {
+    it('Should change product category', () => {
       shopSystem.setProductCategory(car.id, 'Bike');
 
       expect(car.category).toBe('Bike');
@@ -135,15 +138,15 @@ describe('ShopSystem', () => {
     it('Should add Lamp to categories', () => {
       shopSystem.addCategory('Lamp');
 
-      expect(shopSystem.showCategories()).toContain('Lamp');
+      expect(shopSystem.categories).toContain('Lamp');
     });
 
     it('Should remove Lamp from categories list', () => {
       shopSystem.addCategory('Lamp');
-      expect(shopSystem.showCategories()).toContain('Lamp');
+      expect(shopSystem.categories).toContain('Lamp');
 
       shopSystem.removeCategory('Lamp');
-      expect(shopSystem.showCategories()).not.toContain('Lamp');
+      expect(shopSystem.categories).not.toContain('Lamp');
     });
   });
 
@@ -168,15 +171,15 @@ describe('ShopSystem', () => {
       });
     });
 
-    it('Should decrease car quantity after adding to cart from 10 to 5', () => {
-      expect(shopSystem.showProducts()).toContainEqual({
+    it('Should decrease product quantity after adding to cart from 10 to 5', () => {
+      expect(shopSystem.products).toContainEqual({
         product: car,
         quantity: 10,
       });
 
       shopSystem.addProductToCart(newCartId, carToCart);
 
-      expect(shopSystem.showProducts()).toContainEqual({
+      expect(shopSystem.products).toContainEqual({
         product: car,
         quantity: 5,
       });
@@ -217,31 +220,140 @@ describe('ShopSystem', () => {
 
       shopSystem.removeAllProductsFromCart(newCartId);
 
-      expect(cart.productList).not.toHaveLength(2);
+      expect(cart.productList).toHaveLength(0);
+    });
+
+    it('Should restock product quantity after removing product from cart', () => {
+      shopSystem.addProductToCart(newCartId, carToCart);
+
+      expect(shopSystem.products).toContainEqual({ product: car, quantity: 5 });
+
+      shopSystem.removeProductFromCart(newCartId, car.id);
+
+      expect(shopSystem.products).toContainEqual({
+        product: car,
+        quantity: 10,
+      });
+    });
+
+    it('Should add cart to finalized order list and remove cart', () => {
+      shopSystem.addProductToCart(newCartId, carToCart);
+
+      expect(shopSystem.finalizedOrderList.size).toBe(0);
+
+      shopSystem.finalizeOrder(newCartId);
+
+      expect(shopSystem.finalizedOrderList.has(newCartId)).toBeTruthy();
+
+      expect(() => {
+        shopSystem.findCart(newCartId);
+      }).toThrow();
     });
   });
 
-  it('Should restock product quantity after removing from cart', () => {
-    shopSystem.addProductToCart(newCartId, carToCart);
+  describe('Should throw errors when', () => {
+    it('Should throw error when cannot find cart', () => {
+      expect(() => {
+        shopSystem.findCart('123456');
+      }).toThrow();
+    });
 
-    expect(shopSystem.products).toContainEqual({ product: car, quantity: 5 });
+    it('Should throw error when cannot find product', () => {
+      expect(() => {
+        shopSystem.findProduct('123456');
+      }).toThrow();
+    });
 
-    shopSystem.removeProductFromCart(newCartId, car.id);
+    describe('Product - should throw errors when', () => {
+      it('Should throw error when creating product with stock below or equal 0', () => {
+        expect(() => {
+          shopSystem.addProduct({
+            product: new Product({
+              name: 'Burger',
+              price: 10,
+              category: 'Food',
+            }),
+            quantity: -10,
+          });
+        }).toThrow();
+      });
 
-    expect(shopSystem.products).toContainEqual({ product: car, quantity: 10 });
-  });
+      it('Should throw error when creating product with price below or equal 0', () => {
+        expect(() => {
+          shopSystem.addProduct({
+            product: new Product({
+              name: 'Burger',
+              price: 0,
+              category: 'Food',
+            }),
+            quantity: 10,
+          });
+        }).toThrow();
+      });
 
-  it('Should add cart to finalized order list and remove cart', () => {
-    shopSystem.addProductToCart(newCartId, carToCart);
+      it('Should throw error when creating product with an empty name', () => {
+        expect(() => {
+          shopSystem.addProduct({
+            product: new Product({
+              name: '',
+              price: 10,
+              category: 'Food',
+            }),
+            quantity: 10,
+          });
+        }).toThrow();
+      });
 
-    expect(shopSystem.finalizedOrderList.size).toBe(0);
+      it('Should throw error when creating product with an empty category', () => {
+        expect(() => {
+          shopSystem.addProduct({
+            product: new Product({
+              name: 'Burger',
+              price: 10,
+              category: '',
+            }),
+            quantity: 10,
+          });
+        }).toThrow();
+      });
 
-    shopSystem.finalizeOrder(newCartId);
+      it('Should throw error when updating product with price below or equal 0', () => {
+        expect(() => {
+          shopSystem.setProductPrice(car.id, -20);
+        }).toThrow();
+      });
 
-    expect(shopSystem.finalizedOrderList.has(newCartId)).toBeTruthy();
+      it('Should throw error when updating product with an empty name', () => {
+        expect(() => {
+          shopSystem.setProductName(car.id, '');
+        }).toThrow();
+      });
 
-    expect(() => {
-      shopSystem.findCart(newCartId);
-    }).toThrow();
+      it('Should throw error when updating product with only a whitespace on name', () => {
+        expect(() => {
+          shopSystem.setProductName(car.id, '           ');
+        }).toThrow();
+      });
+
+      it('Should throw error when updating product with an empty category', () => {
+        expect(() => {
+          shopSystem.setProductCategory(car.id, '');
+        }).toThrow();
+      });
+    });
+
+    describe('Cart - should throw errors when', () => {
+      it('Should throw error after adding product with amount less than 1', () => {
+        expect(() => {
+          shopSystem.addProductToCart(newCartId, { ...carToCart, amount: -5 });
+        }).toThrow();
+      });
+
+      it('Should throw error after deleting item which do not exist in cart', () => {
+        expect(() => {
+          shopSystem.removeProductFromCart(newCartId, car.id);
+        }).toThrow();
+      });
+    });
   });
 });
