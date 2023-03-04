@@ -198,7 +198,7 @@ export class ShopSystem {
     product.quantity -= decreaseQuantity;
   }
 
-  private findProduct(id: string): ProductStock {
+  findProduct(id: string): ProductStock {
     const product = this.products.find((item) => item.product.id === id);
 
     if (!product) {
