@@ -129,7 +129,7 @@ describe('Cart', () => {
     expect(cart.findProductAmount(smartphone.id)).toBe(7);
   });
 
-  describe('Throwing error while Cart will get incorrect data when updating', () => {
+  describe('Should throw errors when', () => {
     it('Should throw error after adding product with amount less than 1', () => {
       expect(() => {
         cart.addProduct({
@@ -145,7 +145,7 @@ describe('Cart', () => {
       }).toThrow();
     });
 
-    it('Should throw error after deleting item which do not exist', () => {
+    it('Should throw error after deleting item which do not exist in cart', () => {
       cart.addProduct({
         product: fiat,
         amount: 1,
