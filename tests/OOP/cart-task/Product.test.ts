@@ -40,38 +40,44 @@ describe('Product', () => {
     expect(smartphone.category).toBe('watches');
   });
 
-  describe('Throwing error while Product will get incorrect data when creating or updating', () => {
-    it('Should throw error when creating with price below or equal 0', () => {
+  describe('Should throw error when', () => {
+    it('Should throw error when creating product with price below or equal 0', () => {
       expect(() => {
         new Product({ name: 'Burger', price: 0, category: 'Food' });
       }).toThrow();
     });
 
-    it('Should throw error when creating with an empty name', () => {
+    it('Should throw error when creating product with an empty name', () => {
       expect(() => {
         new Product({ name: '', price: 10, category: 'Food' });
       }).toThrow();
     });
 
-    it('Should throw error when creating with an empty category', () => {
+    it('Should throw error when creating product with an empty category', () => {
       expect(() => {
         new Product({ name: 'Burger', price: 10, category: '' });
       }).toThrow();
     });
 
-    it('Should throw error when updating with price below or equal 0', () => {
+    it('Should throw error when updating product with price below or equal 0', () => {
       expect(() => {
         smartphone.setPrice(-10);
       }).toThrow();
     });
 
-    it('Should throw error when updating with an empty name', () => {
+    it('Should throw error when updating product with an empty name', () => {
       expect(() => {
         smartphone.setName('');
       }).toThrow();
     });
 
-    it('Should throw error when updating with an empty category', () => {
+    it('Should throw error when updating product with only a whitespace on name', () => {
+      expect(() => {
+        smartphone.setName('              ');
+      }).toThrow();
+    });
+
+    it('Should throw error when updating product with an empty category', () => {
       expect(() => {
         smartphone.setCategory('');
       }).toThrow();
