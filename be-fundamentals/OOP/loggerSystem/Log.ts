@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { User } from './User';
+import { UserRole } from './User';
 
 export enum LogType {
   ERROR = 'error',
@@ -9,39 +9,51 @@ export enum LogType {
   VERBOSE = 'verbose',
 }
 
-export type LogInformation = {
+type LogInformation = {
   type: LogType;
   content: string;
-  createdBy: User;
+  permission: UserRole;
+  createdBy: string;
 };
 
 interface ILog extends LogInformation {
   id: string;
   isDeleted: boolean;
-  deletedBy: User;
+  deletedBy: string;
   deletedAt: Date;
   createdAt: Date;
-  delete(user: User): void;
+  delete(userId: string): void;
 }
 
 export class Log implements ILog {
   type: LogType;
   content: string;
-  deletedBy: User;
-  deletedAt: Date;
-  createdBy: User;
-  isDeleted: boolean = false;
+  createdBy: string;
   createdAt: Date = new Date();
+  permission: UserRole;
+  isDeleted: boolean = false;
+  deletedBy: string;
+  deletedAt: Date;
 
   constructor(logData: LogInformation, public readonly id = uuid()) {
+    this.checkIfNotEmptyString(logData.content);
+
     this.type = logData.type;
     this.content = logData.content;
     this.createdBy = logData.createdBy;
   }
 
-  delete(user: User): void {
+  delete(userId: string): void {
     this.isDeleted = true;
-    this.deletedBy = user;
+    this.deletedBy = userId;
     this.deletedAt = new Date();
+  }
+
+  private checkIfNotEmptyString(content: string): void {
+    const contentTrim = content.trim();
+
+    if (contentTrim.length === 0) {
+      throw new Error('Empty content!');
+    }
   }
 }
