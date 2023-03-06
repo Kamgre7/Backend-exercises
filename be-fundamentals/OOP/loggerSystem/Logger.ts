@@ -1,18 +1,18 @@
-import { Log, LogInformation } from './Log';
-import { LoggerDB } from './LoggerDB';
+import { Log, LogType } from './Log';
+import { LoggerDB, userDB } from './LoggerDB';
 import { User, UserRole } from './User';
+
+type LogInfoFromUser = {
+  content: string;
+  type: LogType;
+  createdBy: string;
+};
 
 interface ILogger {
   logs: Log[];
-  createLog(log: LogInformation): string;
-  getAllLogs(): Log[];
-  getAdminLogs(): Log[];
-  getBasicLogs(): Log[];
-  getAdminAndBasicLogs(): Log[];
-  getUserLogs(userId: string): Log[];
-  deleteLog(logId: string, user: User): void;
+  createLog(logData: LogInfoFromUser): string;
+  deleteLog(logId: string, userId: string): void;
 }
-
 export class Logger implements ILogger {
   private static instance: Logger;
   logs: Log[] = LoggerDB;
@@ -27,44 +27,109 @@ export class Logger implements ILogger {
     return Logger.instance;
   }
 
-  createLog(log: LogInformation): string {
-    const newLog = new Log(log);
+  createLog(logData: LogInfoFromUser): string {
+    const { content, type, createdBy } = logData;
+    const user = this.findUser(createdBy);
+
+    const newLog = new Log({
+      type,
+      content,
+      createdBy,
+      permission: user.role,
+    });
+
     this.logs.push(newLog);
 
     return newLog.id;
   }
 
-  getAllLogs(): Log[] {
+  getLogs(userId: string): Log[] {
+    const user = this.findUser(userId);
+
+    switch (user.role) {
+      case UserRole.BASIC:
+        return this.getBasicLogs(userId);
+
+      case UserRole.ADMIN:
+        return this.getAdminLogs();
+
+      case UserRole.OWNER:
+        return this.getOwnerLogs();
+
+      default:
+        throw new Error('Error, try again later');
+    }
+  }
+
+  deleteLog(logId: string, userId: string): void {
+    const log = this.findLog(logId);
+
+    switch (log.permission) {
+      case UserRole.BASIC:
+        this.checkUserRole(userId, [UserRole.OWNER, UserRole.ADMIN]);
+        break;
+
+      case UserRole.ADMIN:
+        this.checkUserRole(userId, [UserRole.OWNER, UserRole.ADMIN]);
+        break;
+
+      case UserRole.OWNER:
+        this.checkUserRole(userId, [UserRole.OWNER]);
+        break;
+
+      default:
+        throw new Error('Error, try again later');
+    }
+
+    log.delete(userId);
+  }
+
+  findUser(userId: string): User {
+    const user = userDB.find((user) => user.id === userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
+  }
+
+  findLog(logId: string): Log {
+    const log = this.logs.find((log) => log.id === logId);
+
+    if (!log) {
+      throw new Error('Log not found');
+    }
+
+    return log;
+  }
+
+  private getOwnerLogs(): Log[] {
     return this.logs.filter((log) => log.isDeleted === false);
   }
 
-  getAdminLogs(): Log[] {
+  private getAdminLogs(): Log[] {
     return this.logs.filter(
-      (log) => log.createdBy.role === UserRole.ADMIN && log.isDeleted === false
+      (log) =>
+        (log.permission === UserRole.ADMIN ||
+          log.permission === UserRole.BASIC) &&
+        log.isDeleted === false
     );
   }
 
-  getBasicLogs(): Log[] {
+  private getBasicLogs(userId: string): Log[] {
     return this.logs.filter(
-      (log) => log.createdBy.role === UserRole.BASIC && log.isDeleted === false
+      (log) => log.createdBy === userId && log.isDeleted === false
     );
   }
 
-  getAdminAndBasicLogs(): Log[] {
-    return [...this.getAdminLogs(), ...this.getBasicLogs()];
-  }
+  private checkUserRole(userId: string, roles: UserRole[]): void {
+    const user = this.findUser(userId);
+    const isAllowed = roles.some((role) => role === user.role);
 
-  getUserLogs(userId: string): Log[] {
-    return this.logs.filter((log) => log.createdBy.id === userId);
-  }
-
-  getDeletedLogs(): Log[] {
-    return this.logs.filter((log) => log.isDeleted === true);
-  }
-
-  deleteLog(logId: string, user: User): void {
-    const log = this.logs.find((log) => log.id === logId);
-    log.delete(user);
+    if (!isAllowed) {
+      throw new Error('Forbidden resource');
+    }
   }
 }
 
