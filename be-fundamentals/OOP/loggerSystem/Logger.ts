@@ -11,6 +11,9 @@ type LogInfoFromUser = {
 interface ILogger {
   logs: Log[];
   createLog(logData: LogInfoFromUser): string;
+  getLogs(userId: string): Log[];
+  findUser(userId: string): User;
+  findLog(logId: string): Log;
   deleteLog(logId: string, userId: string): void;
 }
 export class Logger implements ILogger {
