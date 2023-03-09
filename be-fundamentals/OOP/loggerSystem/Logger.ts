@@ -1,33 +1,45 @@
-import { Log, LogType } from './Log';
-import { LoggerDB, userDB } from './LoggerDB';
-import { User, UserRole } from './User';
+import { Log, LOG_TYPE, ILog } from './Log';
+import { logDB, userDB } from './LoggerDB';
+import { IUser, USER_ROLE } from './User';
+
+const accessMapper = {
+  [USER_ROLE.BASIC]: 0,
+  [USER_ROLE.ADMIN]: 1,
+  [USER_ROLE.OWNER]: 2,
+};
 
 type LogInfoFromUser = {
   content: string;
-  type: LogType;
+  type: LOG_TYPE;
   createdBy: string;
 };
 
 interface ILogger {
-  logs: Log[];
+  logs: Map<string, ILog>;
+  users: Map<string, IUser>;
+  clearInstance(): void;
   createLog(logData: LogInfoFromUser): string;
-  getLogs(userId: string): Log[];
-  findUser(userId: string): User;
-  findLog(logId: string): Log;
+  getLogs(userId: string): Map<string, ILog>;
+  findUser(userId: string): IUser;
+  findLog(logId: string): ILog;
   deleteLog(logId: string, userId: string): void;
 }
+
 export class Logger implements ILogger {
   private static instance: Logger;
-  logs: Log[] = LoggerDB;
 
-  private constructor() {}
+  private constructor(public logs = logDB, public users = userDB) {}
 
   static getInstance(): Logger {
     if (!Logger.instance) {
-      Logger.instance = new Logger();
+      Logger.instance = new Logger(logDB, userDB);
     }
 
     return Logger.instance;
+  }
+
+  clearInstance() {
+    Logger.instance = null;
   }
 
   createLog(logData: LogInfoFromUser): string {
@@ -41,22 +53,22 @@ export class Logger implements ILogger {
       permission: user.role,
     });
 
-    this.logs.push(newLog);
+    this.logs.set(newLog.id, newLog);
 
     return newLog.id;
   }
 
-  getLogs(userId: string): Log[] {
+  getLogs(userId: string): Map<string, ILog> {
     const user = this.findUser(userId);
 
     switch (user.role) {
-      case UserRole.BASIC:
+      case USER_ROLE.BASIC:
         return this.getBasicLogs(userId);
 
-      case UserRole.ADMIN:
+      case USER_ROLE.ADMIN:
         return this.getAdminLogs();
 
-      case UserRole.OWNER:
+      case USER_ROLE.OWNER:
         return this.getOwnerLogs();
 
       default:
@@ -66,73 +78,60 @@ export class Logger implements ILogger {
 
   deleteLog(logId: string, userId: string): void {
     const log = this.findLog(logId);
+    const user = this.findUser(userId);
 
-    switch (log.permission) {
-      case UserRole.BASIC:
-        this.checkUserRole(userId, [UserRole.OWNER, UserRole.ADMIN]);
-        break;
-
-      case UserRole.ADMIN:
-        this.checkUserRole(userId, [UserRole.OWNER, UserRole.ADMIN]);
-        break;
-
-      case UserRole.OWNER:
-        this.checkUserRole(userId, [UserRole.OWNER]);
-        break;
-
-      default:
-        throw new Error('Error, try again later');
+    if (
+      user.role === USER_ROLE.BASIC ||
+      !this.isUserAllowed(user.role, log.permission)
+    ) {
+      throw new Error('Forbidden resource');
     }
 
     log.delete(userId);
   }
 
-  findUser(userId: string): User {
-    const user = userDB.find((user) => user.id === userId);
-
-    if (!user) {
+  findUser(userId: string): IUser {
+    if (!this.users.has(userId)) {
       throw new Error('User not found');
     }
 
-    return user;
+    return this.users.get(userId);
   }
 
-  findLog(logId: string): Log {
-    const log = this.logs.find((log) => log.id === logId);
-
-    if (!log) {
+  findLog(logId: string): ILog {
+    if (!this.logs.has(logId)) {
       throw new Error('Log not found');
     }
 
-    return log;
+    return this.logs.get(logId);
   }
 
-  private getOwnerLogs(): Log[] {
-    return this.logs.filter((log) => log.isDeleted === false);
+  private isUserAllowed(
+    userRole: USER_ROLE,
+    logPermissions: USER_ROLE
+  ): boolean {
+    return accessMapper[userRole] >= accessMapper[logPermissions];
   }
 
-  private getAdminLogs(): Log[] {
-    return this.logs.filter(
-      (log) =>
-        (log.permission === UserRole.ADMIN ||
-          log.permission === UserRole.BASIC) &&
-        log.isDeleted === false
+  private getOwnerLogs(): Map<string, ILog> {
+    return this.logs;
+  }
+
+  private getAdminLogs(): Map<string, ILog> {
+    const logs = [...this.logs].filter(
+      ([key, log]) =>
+        log.permission === USER_ROLE.ADMIN || log.permission === USER_ROLE.BASIC
     );
+
+    return new Map([...logs]);
   }
 
-  private getBasicLogs(userId: string): Log[] {
-    return this.logs.filter(
-      (log) => log.createdBy === userId && log.isDeleted === false
+  private getBasicLogs(userId: string): Map<string, ILog> {
+    const logs = [...this.logs].filter(
+      ([key, log]) => log.createdBy === userId && !log.isDeleted
     );
-  }
 
-  private checkUserRole(userId: string, roles: UserRole[]): void {
-    const user = this.findUser(userId);
-    const isAllowed = roles.some((role) => role === user.role);
-
-    if (!isAllowed) {
-      throw new Error('Forbidden resource');
-    }
+    return new Map([...logs]);
   }
 }
 
