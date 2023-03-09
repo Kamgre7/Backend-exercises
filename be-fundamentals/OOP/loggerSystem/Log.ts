@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
-import { UserRole } from './User';
+import { USER_ROLE } from './User';
 
-export enum LogType {
+export enum LOG_TYPE {
   ERROR = 'error',
   WARNING = 'warning',
   INFO = 'info',
@@ -10,13 +10,13 @@ export enum LogType {
 }
 
 type LogInformation = {
-  type: LogType;
+  type: LOG_TYPE;
   content: string;
-  permission: UserRole;
+  permission: USER_ROLE;
   createdBy: string;
 };
 
-interface ILog extends LogInformation {
+export interface ILog extends LogInformation {
   id: string;
   isDeleted: boolean;
   deletedBy: string;
@@ -26,11 +26,11 @@ interface ILog extends LogInformation {
 }
 
 export class Log implements ILog {
-  type: LogType;
+  type: LOG_TYPE;
   content: string;
   createdBy: string;
   createdAt: Date = new Date();
-  permission: UserRole;
+  permission: USER_ROLE;
   isDeleted: boolean = false;
   deletedBy: string;
   deletedAt: Date;
@@ -40,6 +40,7 @@ export class Log implements ILog {
 
     this.type = logData.type;
     this.content = logData.content;
+    this.permission = logData.permission;
     this.createdBy = logData.createdBy;
   }
 
