@@ -7,7 +7,7 @@ export enum USER_ROLE {
   BASIC = 'basic',
 }
 
-interface IUser {
+export interface IUser {
   id: string;
   email: string;
   role: USER_ROLE;
