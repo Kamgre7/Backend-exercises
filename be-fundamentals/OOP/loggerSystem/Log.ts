@@ -45,6 +45,10 @@ export class Log implements ILog {
   }
 
   delete(userId: string): void {
+    if (this.isDeleted) {
+      throw new Error('Log already deleted');
+    }
+
     this.isDeleted = true;
     this.deletedBy = userId;
     this.deletedAt = new Date();
