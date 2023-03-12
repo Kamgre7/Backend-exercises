@@ -73,5 +73,12 @@ describe('Log', () => {
         });
       }).toThrow();
     });
+
+    it('Should throw error when trying delete deleted log', () => {
+      expect(() => {
+        log.delete(user.id);
+        log.delete(user.id);
+      }).toThrow();
+    });
   });
 });
