@@ -30,9 +30,12 @@ export class Logger implements ILogger {
 
   private constructor(public logs = logDB, public users = userDB) {}
 
-  static getInstance(): Logger {
+  static getInstance(
+    logs?: Map<string, ILog>,
+    users?: Map<string, IUser>
+  ): Logger {
     if (!Logger.instance) {
-      Logger.instance = new Logger(logDB, userDB);
+      Logger.instance = new Logger(logs, users);
     }
 
     return Logger.instance;
