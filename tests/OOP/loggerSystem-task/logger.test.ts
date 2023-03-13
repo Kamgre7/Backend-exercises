@@ -14,9 +14,9 @@ let logger: Logger;
 let basicUser: User;
 let adminUser: User;
 let ownerUser: User;
-let basicLog: Log;
-let adminLog: Log;
-let ownerLog: Log;
+let basicLogError: Log;
+let adminLogWarning: Log;
+let ownerLogInfo: Log;
 let logList: Map<string, ILog>;
 let userList: Map<string, IUser>;
 
@@ -29,21 +29,21 @@ beforeEach(() => {
   adminUser = new User('admin@user.com', USER_ROLE.ADMIN);
   ownerUser = new User('owner@user.com', USER_ROLE.OWNER);
 
-  basicLog = new Log({
+  basicLogError = new Log({
     content: 'Error log',
     createdBy: basicUser.id,
     permission: basicUser.role,
     type: LOG_TYPE.ERROR,
   });
 
-  adminLog = new Log({
+  adminLogWarning = new Log({
     content: 'Warning log',
     createdBy: adminUser.id,
     permission: adminUser.role,
     type: LOG_TYPE.WARNING,
   });
 
-  ownerLog = new Log({
+  ownerLogInfo = new Log({
     content: 'Info log',
     createdBy: ownerUser.id,
     permission: ownerUser.role,
@@ -51,9 +51,9 @@ beforeEach(() => {
   });
 
   logList = new Map([
-    [basicLog.id, basicLog],
-    [adminLog.id, adminLog],
-    [ownerLog.id, ownerLog],
+    [basicLogError.id, basicLogError],
+    [adminLogWarning.id, adminLogWarning],
+    [ownerLogInfo.id, ownerLogInfo],
   ]);
 
   userList = new Map([
@@ -97,23 +97,23 @@ describe('Logger', () => {
     const [...logs] = logger.getLogs(adminUser.id);
 
     expect(logs).toStrictEqual([
-      [basicLog.id, basicLog],
-      [adminLog.id, adminLog],
+      [basicLogError.id, basicLogError],
+      [adminLogWarning.id, adminLogWarning],
     ]);
   });
 
   it('Should return a list of logs which user created - basic', () => {
     const [...logs] = logger.getLogs(basicUser.id);
 
-    expect(logs).toStrictEqual([[basicLog.id, basicLog]]);
+    expect(logs).toStrictEqual([[basicLogError.id, basicLogError]]);
   });
 
   it('Should delete a log', () => {
-    expect(basicLog.isDeleted).toBeFalsy();
+    expect(basicLogError.isDeleted).toBeFalsy();
 
-    logger.deleteLog(basicLog.id, adminUser.id);
+    logger.deleteLog(basicLogError.id, adminUser.id);
 
-    expect(basicLog.isDeleted).toBeTruthy();
+    expect(basicLogError.isDeleted).toBeTruthy();
   });
 
   it('Should find a user', () => {
@@ -123,9 +123,9 @@ describe('Logger', () => {
   });
 
   it('Should find a log', () => {
-    const log = logger.findLog(adminLog.id);
+    const log = logger.findLog(adminLogWarning.id);
 
-    expect(log).toStrictEqual(adminLog);
+    expect(log).toStrictEqual(adminLogWarning);
   });
 
   describe('Should throw error when', () => {
@@ -150,15 +150,22 @@ describe('Logger', () => {
     });
 
     it('Should throw error when trying delete deleted log', () => {
+      logger.deleteLog(ownerLogInfo.id, ownerUser.id);
+
       expect(() => {
-        logger.deleteLog(ownerLog.id, ownerUser.id);
-        logger.deleteLog(ownerLog.id, ownerUser.id);
+        logger.deleteLog(ownerLogInfo.id, ownerUser.id);
       });
     });
 
     it('Should throw error when user is trying to delete a post with higher permission', () => {
       expect(() => {
-        logger.deleteLog(ownerLog.id, basicUser.id);
+        logger.deleteLog(ownerLogInfo.id, basicUser.id);
+      });
+    });
+
+    it('Should throw error when user with basic role is trying to delete a post with basic permission', () => {
+      expect(() => {
+        logger.deleteLog(basicLogError.id, basicUser.id);
       });
     });
 
