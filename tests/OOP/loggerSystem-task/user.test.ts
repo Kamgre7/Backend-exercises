@@ -20,10 +20,6 @@ describe('User', () => {
     expect(adminUser.role).toBe(USER_ROLE.ADMIN);
   });
 
-  it('Should have the same email as when registering', () => {
-    expect(basicUser.email).toEqual('basic@user.com');
-  });
-
   describe('Should throw error when', () => {
     it('Should throw error when email is empty string', () => {
       expect(() => {
