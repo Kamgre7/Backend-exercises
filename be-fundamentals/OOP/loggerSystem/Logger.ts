@@ -2,7 +2,7 @@ import { Log, LOG_TYPE, ILog } from './Log';
 import { logDB, userDB } from './LoggerDB';
 import { IUser, USER_ROLE } from './User';
 
-const accessMapper = {
+const accessMapper: Record<USER_ROLE, number> = {
   [USER_ROLE.BASIC]: 0,
   [USER_ROLE.ADMIN]: 1,
   [USER_ROLE.OWNER]: 2,
@@ -126,7 +126,7 @@ export class Logger implements ILogger {
         log.permission === USER_ROLE.ADMIN || log.permission === USER_ROLE.BASIC
     );
 
-    return new Map([...logs]);
+    return new Map(logs);
   }
 
   private getBasicLogs(userId: string): Map<string, ILog> {
@@ -134,7 +134,7 @@ export class Logger implements ILogger {
       ([key, log]) => log.createdBy === userId && !log.isDeleted
     );
 
-    return new Map([...logs]);
+    return new Map(logs);
   }
 }
 
