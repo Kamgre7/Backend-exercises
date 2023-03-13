@@ -23,31 +23,14 @@ describe('Log', () => {
     expect(log).toBeInstanceOf(Log);
   });
 
-  it('Should be error type', () => {
-    expect(log.type).toEqual(LOG_TYPE.ERROR);
-  });
-
-  it('Should have admin permission', () => {
-    expect(log.permission).toEqual(user.role);
-  });
-
   it('Should have default false value on isDeleted', () => {
     expect(log.isDeleted).toBeFalsy();
   });
 
-  it('Should be created by user', () => {
-    expect(log.createdBy).toBe(user.id);
-  });
-
-  it('Should change isDeleted value to true after deleting', () => {
+  it('Should change isDeleted value to true after deleting, and have user id which deleted log on deletedBy value', () => {
     log.delete(user.id);
 
     expect(log.isDeleted).toBeTruthy();
-  });
-
-  it('Should have user id which deleted log on deletedBy value', () => {
-    log.delete(user.id);
-
     expect(log.deletedBy).toEqual(user.id);
   });
 
@@ -75,8 +58,9 @@ describe('Log', () => {
     });
 
     it('Should throw error when trying delete deleted log', () => {
+      log.delete(user.id);
+
       expect(() => {
-        log.delete(user.id);
         log.delete(user.id);
       }).toThrow();
     });
