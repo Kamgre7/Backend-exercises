@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-export type BookInformation = {
+export type BookDetails = {
   title: string;
   author: string;
   isbn: string;
@@ -8,25 +8,25 @@ export type BookInformation = {
 
 export type IBook = {
   id: string;
-} & BookInformation;
+} & BookDetails;
 
 export class Book implements IBook {
   public title: string;
   public author: string;
   public isbn: string;
 
-  constructor(bookInformation: BookInformation, public readonly id = uuid()) {
-    this.validateNewBook(bookInformation);
+  constructor(bookDetails: BookDetails, public readonly id = uuid()) {
+    this.validateNewBook(bookDetails);
 
-    this.title = bookInformation.title;
-    this.author = bookInformation.author;
-    this.isbn = bookInformation.isbn;
+    this.title = bookDetails.title;
+    this.author = bookDetails.author;
+    this.isbn = bookDetails.isbn;
   }
 
-  private validateNewBook(bookInformation: BookInformation): void {
-    this.checkIfNotEmptyString(bookInformation.title, 'title');
-    this.checkIfNotEmptyString(bookInformation.author, 'author');
-    this.checkIfNotEmptyString(bookInformation.isbn, 'isbn');
+  private validateNewBook(bookDetails: BookDetails): void {
+    this.checkIfNotEmptyString(bookDetails.title, 'title');
+    this.checkIfNotEmptyString(bookDetails.author, 'author');
+    this.checkIfNotEmptyString(bookDetails.isbn, 'isbn');
   }
 
   private checkIfNotEmptyString(name: string, inputName: string): void {
