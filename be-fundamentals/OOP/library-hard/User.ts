@@ -1,11 +1,11 @@
 import { v4 as uuid } from 'uuid';
 import { emailRegex } from './utils';
 
-export interface IUser {
+export type IUser = {
   id: string;
   email: string;
   createdAt: Date;
-}
+};
 
 export class User implements IUser {
   email: string;
