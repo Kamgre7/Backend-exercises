@@ -6,14 +6,23 @@ export type BookDetails = {
   isbn: string;
 };
 
-export type IBook = {
+export interface IBook extends BookDetails {
   id: string;
-} & BookDetails;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
+  setTitle(newTitle: string): void;
+  setAuthor(newAuthor: string): void;
+  setIsbn(newIsbn: string): void;
+}
 
 export class Book implements IBook {
   public title: string;
   public author: string;
   public isbn: string;
+  public createdAt: Date = new Date();
+  public updatedAt: Date;
+  public deletedAt: Date;
 
   constructor(bookDetails: BookDetails, public readonly id = uuid()) {
     this.validateNewBook(bookDetails);
@@ -21,6 +30,31 @@ export class Book implements IBook {
     this.title = bookDetails.title;
     this.author = bookDetails.author;
     this.isbn = bookDetails.isbn;
+  }
+
+  setAuthor(newAuthor: string): void {
+    this.checkIfNotEmptyString(newAuthor, 'author');
+
+    this.author = newAuthor;
+    this.updateDate();
+  }
+
+  setTitle(newTitle: string): void {
+    this.checkIfNotEmptyString(newTitle, 'title');
+
+    this.author = newTitle;
+    this.updateDate();
+  }
+
+  setIsbn(newIsbn: string): void {
+    this.checkIfNotEmptyString(newIsbn, 'isbn');
+
+    this.author = newIsbn;
+    this.updateDate();
+  }
+
+  private updateDate(): void {
+    this.updatedAt = new Date();
   }
 
   private validateNewBook(bookDetails: BookDetails): void {
