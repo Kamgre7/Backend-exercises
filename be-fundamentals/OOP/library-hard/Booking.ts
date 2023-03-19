@@ -1,8 +1,46 @@
-export type IBooking = {
+import { v4 as uuid } from 'uuid';
+
+export type BookingDetails = {
+  userId: string;
   bookId: string;
-  bookedAt: Date;
 };
 
+export interface IBooking extends BookingDetails {
+  id: string;
+  isActive: boolean;
+  bookedAt: Date;
+  returnedAt: Date;
+  setIsNotActive(): void;
+  setReturnedDate(): void;
+}
+
 export class Booking implements IBooking {
-  constructor(public bookId: string, public readonly bookedAt = new Date()) {}
+  userId: string;
+  bookId: string;
+  isActive: boolean = true;
+  bookedAt: Date = new Date();
+  returnedAt: Date;
+
+  constructor(bookingDetails: BookingDetails, public readonly id = uuid()) {
+    const { bookId, userId } = bookingDetails;
+
+    this.verifyId(userId, bookId);
+
+    this.bookId = bookId;
+    this.userId = userId;
+  }
+
+  setIsNotActive(): void {
+    this.isActive = false;
+  }
+
+  setReturnedDate(): void {
+    this.returnedAt = new Date();
+  }
+
+  private verifyId(userId: string, bookId: string): void {
+    if (userId.length !== 36 || bookId.length !== 36) {
+      throw new Error('Invalid id');
+    }
+  }
 }
