@@ -8,21 +8,22 @@ export type BookDetails = {
 
 export interface IBook extends BookDetails {
   id: string;
-  createdAt: Date;
+  readonly createdAt: Date;
   updatedAt: Date;
   deletedAt: Date;
   setTitle(newTitle: string): void;
   setAuthor(newAuthor: string): void;
   setIsbn(newIsbn: string): void;
+  setDeletedDate(): void;
 }
 
 export class Book implements IBook {
-  public title: string;
-  public author: string;
-  public isbn: string;
-  public createdAt: Date = new Date();
-  public updatedAt: Date;
-  public deletedAt: Date;
+  title: string;
+  author: string;
+  isbn: string;
+  readonly createdAt: Date = new Date();
+  updatedAt: Date;
+  deletedAt: Date;
 
   constructor(bookDetails: BookDetails, public readonly id = uuid()) {
     this.validateNewBook(bookDetails);
@@ -51,6 +52,10 @@ export class Book implements IBook {
 
     this.author = newIsbn;
     this.updateDate();
+  }
+
+  setDeletedDate(): void {
+    this.deletedAt = new Date();
   }
 
   private updateDate(): void {
