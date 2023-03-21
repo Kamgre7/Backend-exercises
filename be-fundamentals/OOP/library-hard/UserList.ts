@@ -12,6 +12,7 @@ export interface IUserList {
   addUser(email: string): void;
   setUserEmail(userId: string, newEmail: string): void;
   blockUser(userId: string): void;
+  activateUser(userId: string): void;
   findUser(userId: string): UserInformation;
 }
 
@@ -51,6 +52,14 @@ export class UserList implements IUserList {
 
     user.isActive = false;
     user.user.blockedAt = new Date();
+  }
+
+  activateUser(userId: string): void {
+    const user = this.findUser(userId);
+
+    user.isActive = true;
+    user.penaltyPoints = 0;
+    user.user.blockedAt = null;
   }
 
   findUser(userId: string): UserInformation {
