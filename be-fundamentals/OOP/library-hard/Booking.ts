@@ -12,6 +12,8 @@ export interface IBooking extends BookingDetails {
   returnedAt: Date;
   setIsNotActive(): void;
   setReturnedDate(): void;
+  getBookedDate(): Date;
+  getReturnedDate(): Date;
 }
 
 export class Booking implements IBooking {
@@ -36,6 +38,18 @@ export class Booking implements IBooking {
 
   setReturnedDate(): void {
     this.returnedAt = new Date();
+  }
+
+  getBookedDate(): Date {
+    return this.bookedAt;
+  }
+
+  getReturnedDate(): Date {
+    if (!this.returnedAt) {
+      throw new Error('Book is not returned');
+    }
+
+    return this.returnedAt;
   }
 
   private verifyId(userId: string, bookId: string): void {
