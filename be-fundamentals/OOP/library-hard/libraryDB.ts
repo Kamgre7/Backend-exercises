@@ -1,7 +1,8 @@
 import { Book } from './Book';
-import { IBooking } from './Booking';
-import { BookInformation, UserInformation } from './Library';
+import { Booking, IBooking } from './Booking';
+import { BookInformation } from './BookList';
 import { User } from './User';
+import { UserInformation } from './UserList';
 
 const harryPotter = new Book({
   title: 'Harry Potter',
@@ -18,19 +19,24 @@ const lordOfTheRings = new Book({
 const user = new User('user@library.com');
 const admin = new User('admin@library.com');
 
+const harryPotterBooking = new Booking({
+  bookId: harryPotter.id,
+  userId: user.id,
+});
+
 export const bookDB: Map<string, BookInformation> = new Map([
   [
     harryPotter.id,
     {
       book: harryPotter,
-      isAvailable: true,
+      quantity: 10,
     },
   ],
   [
     lordOfTheRings.id,
     {
       book: lordOfTheRings,
-      isAvailable: true,
+      quantity: 5,
     },
   ],
 ]);
@@ -40,8 +46,8 @@ export const userDB: Map<string, UserInformation> = new Map([
     user.id,
     {
       user,
-      borrowedBooks: new Map<string, IBooking>(),
-      points: 0,
+      penaltyPoints: 0,
+      isActive: true,
     },
   ],
 
@@ -49,8 +55,12 @@ export const userDB: Map<string, UserInformation> = new Map([
     admin.id,
     {
       user: admin,
-      borrowedBooks: new Map<string, IBooking>(),
-      points: 0,
+      penaltyPoints: 0,
+      isActive: true,
     },
   ],
+]);
+
+export const bookingDB: Map<string, IBooking> = new Map([
+  [harryPotterBooking.id, harryPotterBooking],
 ]);
