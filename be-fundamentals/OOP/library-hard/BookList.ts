@@ -10,13 +10,7 @@ export interface IBookList {
   books: Map<string, BookInformation>;
   addBook(bookDetails: BookDetails, quantity: number): string;
   deleteBook(bookId: string): void;
-  findBook(bookId: string): BookInformation;
-  setBookAuthor(bookId: string, newAuthor: string): void;
-  setBookTitle(bookId: string, newTitle: string): void;
-  setBookIsbn(bookId: string, newIsbn: string): void;
-  setBookQuantity(bookId: string, quantity: number): void;
-  increaseBookQuantityByOne(bookId: string): void;
-  decreaseBookQuantityByOne(bookId: string): void;
+  findBookOrThrow(bookId: string): BookInformation;
 }
 
 export class BookList implements IBookList {
@@ -46,54 +40,17 @@ export class BookList implements IBookList {
   }
 
   deleteBook(bookId: string): void {
-    const book = this.findBook(bookId);
+    const { book } = this.findBookOrThrow(bookId);
 
-    this.books.delete(book.book.id);
+    this.books.delete(book.id);
   }
 
-  setBookAuthor(bookId: string, newAuthor: string): void {
-    const book = this.findBook(bookId);
-
-    book.book.setAuthor(newAuthor);
-  }
-
-  setBookTitle(bookId: string, newTitle: string): void {
-    const book = this.findBook(bookId);
-
-    book.book.setTitle(newTitle);
-  }
-
-  setBookIsbn(bookId: string, newIsbn: string): void {
-    const book = this.findBook(bookId);
-
-    book.book.setIsbn(newIsbn);
-  }
-
-  findBook(bookId: string): BookInformation {
+  findBookOrThrow(bookId: string): BookInformation {
     if (!this.books.has(bookId)) {
       throw new Error('User not found');
     }
 
     return this.books.get(bookId);
-  }
-
-  increaseBookQuantityByOne(bookId: string): void {
-    const book = this.findBook(bookId);
-
-    book.quantity += 1;
-  }
-
-  decreaseBookQuantityByOne(bookId: string): void {
-    const book = this.findBook(bookId);
-
-    book.quantity -= 1;
-  }
-
-  setBookQuantity(bookId: string, quantity: number): void {
-    this.checkIfNotEqualOrBelowZero(quantity);
-
-    const book = this.findBook(bookId);
-    book.quantity = quantity;
   }
 
   private checkIfNotEqualOrBelowZero(quantity: number) {
