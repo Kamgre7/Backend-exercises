@@ -10,10 +10,8 @@ export type UserInformation = {
 export interface IUserList {
   users: Map<string, UserInformation>;
   addUser(email: string): void;
-  setUserEmail(userId: string, newEmail: string): void;
-  blockUser(userId: string): void;
-  activateUser(userId: string): void;
-  findUser(userId: string): UserInformation;
+  findUserOrThrow(userId: string): UserInformation;
+  checkIfEmailNotUsedOrThrow(email: string): void;
 }
 
 export class UserList implements IUserList {
@@ -30,6 +28,8 @@ export class UserList implements IUserList {
   }
 
   addUser(email: string): string {
+    this.checkIfEmailNotUsedOrThrow(email);
+
     const user = new User(email);
 
     this.users.set(user.id, {
@@ -41,32 +41,20 @@ export class UserList implements IUserList {
     return user.id;
   }
 
-  setUserEmail(userId: string, newEmail: string): void {
-    const user = this.findUser(userId);
-
-    user.user.setEmail(newEmail);
-  }
-
-  blockUser(userId: string): void {
-    const user = this.findUser(userId);
-
-    user.isActive = false;
-    user.user.blockedAt = new Date();
-  }
-
-  activateUser(userId: string): void {
-    const user = this.findUser(userId);
-
-    user.isActive = true;
-    user.penaltyPoints = 0;
-    user.user.blockedAt = null;
-  }
-
-  findUser(userId: string): UserInformation {
+  findUserOrThrow(userId: string): UserInformation {
     if (!this.users.has(userId)) {
       throw new Error('User not found');
     }
 
     return this.users.get(userId);
+  }
+
+  checkIfEmailNotUsedOrThrow(email: string): void {
+    const usersDBEmail = [...this.users].map(([id, user]) => user.user.email);
+    const isEmailInDB = usersDBEmail.some((userEmail) => userEmail === email);
+
+    if (isEmailInDB) {
+      throw new Error('Email already used');
+    }
   }
 }
