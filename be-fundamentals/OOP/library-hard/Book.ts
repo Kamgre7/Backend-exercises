@@ -7,14 +7,13 @@ export type BookDetails = {
 };
 
 export interface IBook extends BookDetails {
-  id: string;
+  readonly id: string;
   readonly createdAt: Date;
   updatedAt: Date;
   deletedAt: Date;
   setTitle(newTitle: string): void;
   setAuthor(newAuthor: string): void;
   setIsbn(newIsbn: string): void;
-  setDeletedDate(): void;
 }
 
 export class Book implements IBook {
@@ -54,10 +53,6 @@ export class Book implements IBook {
     this.updateDate();
   }
 
-  setDeletedDate(): void {
-    this.deletedAt = new Date();
-  }
-
   private updateDate(): void {
     this.updatedAt = new Date();
   }
@@ -76,3 +71,10 @@ export class Book implements IBook {
     }
   }
 }
+
+// type BookDetailsKey = keyof BookDetails;
+/*   changeProperty(key: BookDetailsKey, value: string) {
+    this.checkIfNotEmptyString(value, key);
+    this[key] = value;
+    this.updateDate();
+  } */
