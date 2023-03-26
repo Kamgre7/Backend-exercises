@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid, validate } from 'uuid';
 
 export type BookingDetails = {
   userId: string;
@@ -8,20 +8,20 @@ export type BookingDetails = {
 export interface IBooking extends BookingDetails {
   id: string;
   isActive: boolean;
-  bookedAt: Date;
-  returnedAt: Date;
+  createdAt: Date;
+  returnAt: Date;
   setIsNotActive(): void;
-  setReturnedDate(): void;
-  getBookedDate(): Date;
-  getReturnedDate(): Date;
+  setReturnDate(): void;
+  getBookDate(): Date;
+  getReturnDate(): Date;
 }
 
 export class Booking implements IBooking {
-  userId: string;
-  bookId: string;
+  readonly userId: string;
+  readonly bookId: string;
   isActive: boolean = true;
-  bookedAt: Date = new Date();
-  returnedAt: Date;
+  readonly createdAt: Date = new Date();
+  returnAt: Date;
 
   constructor(bookingDetails: BookingDetails, public readonly id = uuid()) {
     const { bookId, userId } = bookingDetails;
@@ -36,24 +36,20 @@ export class Booking implements IBooking {
     this.isActive = false;
   }
 
-  setReturnedDate(): void {
-    this.returnedAt = new Date();
+  setReturnDate(): void {
+    this.returnAt = new Date();
   }
 
-  getBookedDate(): Date {
-    return this.bookedAt;
+  getBookDate(): Date {
+    return this.createdAt;
   }
 
-  getReturnedDate(): Date {
-    if (!this.returnedAt) {
-      throw new Error('Book is not returned');
-    }
-
-    return this.returnedAt;
+  getReturnDate(): Date {
+    return this.returnAt;
   }
 
   private verifyId(userId: string, bookId: string): void {
-    if (userId.length !== 36 || bookId.length !== 36) {
+    if (!validate(userId) || !validate(bookId)) {
       throw new Error('Invalid id');
     }
   }
