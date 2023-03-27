@@ -1,4 +1,5 @@
 import { Book, BookDetails, IBook } from './Book';
+import { DataValidator } from './DataValidator';
 import { bookDB } from './libraryDB';
 
 export type BookInformation = {
@@ -10,6 +11,7 @@ export interface IBookList {
   books: Map<string, BookInformation>;
   addBook(bookDetails: BookDetails, quantity: number): string;
   deleteBook(bookId: string): void;
+  findBookIdByIsbn(isbn: string): string;
   findBookOrThrow(bookId: string): BookInformation;
 }
 
@@ -20,14 +22,14 @@ export class BookList implements IBookList {
 
   static getInstance(books?: Map<string, BookInformation>): BookList {
     if (!BookList.instance) {
-      BookList.instance = this.getInstance(books);
+      BookList.instance = new BookList(books);
     }
 
     return BookList.instance;
   }
 
   addBook(bookDetails: BookDetails, quantity: number): string {
-    this.checkIfNotEqualOrBelowZero(quantity);
+    DataValidator.checkIfNotEqualOrBelowZero(quantity);
 
     const book = new Book(bookDetails);
 
@@ -47,15 +49,17 @@ export class BookList implements IBookList {
 
   findBookOrThrow(bookId: string): BookInformation {
     if (!this.books.has(bookId)) {
-      throw new Error('User not found');
+      throw new Error('Book not found');
     }
 
     return this.books.get(bookId);
   }
 
-  private checkIfNotEqualOrBelowZero(quantity: number) {
-    if (quantity <= 0) {
-      throw new Error(`Cannot set quantity value less than 1`);
-    }
+  findBookIdByIsbn(isbn: string): string {
+    const bookAlreadyCreated = [...this.books].find(
+      ([id, bookInformation]) => bookInformation.book.isbn === isbn
+    );
+
+    return bookAlreadyCreated ? bookAlreadyCreated[0] : null;
   }
 }
