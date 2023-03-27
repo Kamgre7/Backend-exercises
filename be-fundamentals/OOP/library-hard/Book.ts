@@ -7,8 +7,8 @@ export type BookDetails = {
 };
 
 export interface IBook extends BookDetails {
-  readonly id: string;
-  readonly createdAt: Date;
+  id: string;
+  createdAt: Date;
   updatedAt: Date;
   deletedAt: Date;
   setTitle(newTitle: string): void;
