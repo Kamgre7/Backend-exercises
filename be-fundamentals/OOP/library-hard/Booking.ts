@@ -1,4 +1,5 @@
 import { v4 as uuid, validate } from 'uuid';
+import { dateFormatRegex } from './utils';
 
 export type BookingDetails = {
   userId: string;
@@ -11,7 +12,7 @@ export interface IBooking extends BookingDetails {
   createdAt: Date;
   returnAt: Date;
   setIsNotActive(): void;
-  setReturnDate(): void;
+  setReturnDate(date?: string): void;
   getBookDate(): Date;
   getReturnDate(): Date;
 }
@@ -20,7 +21,7 @@ export class Booking implements IBooking {
   readonly userId: string;
   readonly bookId: string;
   isActive: boolean = true;
-  readonly createdAt: Date = new Date();
+  createdAt: Date = new Date();
   returnAt: Date;
 
   constructor(bookingDetails: BookingDetails, public readonly id = uuid()) {
@@ -36,8 +37,13 @@ export class Booking implements IBooking {
     this.isActive = false;
   }
 
-  setReturnDate(): void {
-    this.returnAt = new Date();
+  setReturnDate(date?: string): void {
+    this.returnAt =
+      dateFormatRegex.test(date) &&
+      new Date(date) <= new Date() &&
+      new Date(date) > this.createdAt
+        ? new Date(date)
+        : new Date();
   }
 
   getBookDate(): Date {
