@@ -20,7 +20,7 @@ export class Book implements IBook {
   title: string;
   author: string;
   isbn: string;
-  readonly createdAt: Date = new Date();
+  createdAt: Date = new Date();
   updatedAt: Date;
   deletedAt: Date;
 
@@ -42,14 +42,14 @@ export class Book implements IBook {
   setTitle(newTitle: string): void {
     this.checkIfNotEmptyString(newTitle, 'title');
 
-    this.author = newTitle;
+    this.title = newTitle;
     this.updateDate();
   }
 
   setIsbn(newIsbn: string): void {
     this.checkIfNotEmptyString(newIsbn, 'isbn');
 
-    this.author = newIsbn;
+    this.isbn = newIsbn;
     this.updateDate();
   }
 
