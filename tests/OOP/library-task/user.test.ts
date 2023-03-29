@@ -18,7 +18,7 @@ describe('User', () => {
   });
 
   describe('Should throw an error when', () => {
-    it('Should throw error while creating user with  empty email', () => {
+    it('Should throw error when creating user with  empty email', () => {
       expect(() => {
         new User('');
       }).toThrow();
