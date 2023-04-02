@@ -13,7 +13,7 @@ export interface IUser {
 
 export class User implements IUser {
   email: string;
-  readonly createdAt: Date = new Date();
+  createdAt: Date = new Date();
   updatedAt: Date;
   deletedAt: Date;
   blockedAt: Date;
