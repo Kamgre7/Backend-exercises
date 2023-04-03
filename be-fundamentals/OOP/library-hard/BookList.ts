@@ -10,6 +10,8 @@ export type BookInformation = {
 export interface IBookList {
   books: Map<string, BookInformation>;
   addBook(bookDetails: BookDetails, quantity: number): string;
+  createNewBook(bookDetails: BookDetails, quantity: number): string;
+  restockBookQuantity(bookId: string, quantity: number): void;
   deleteBook(bookId: string): void;
   findBookIdByIsbn(isbn: string): string;
   findBookOrThrow(bookId: string): BookInformation;
@@ -30,7 +32,20 @@ export class BookList implements IBookList {
 
   addBook(bookDetails: BookDetails, quantity: number): string {
     DataValidator.checkIfNotEqualOrBelowZero(quantity);
+    DataValidator.checkIfInteger(quantity);
 
+    const duplicatedBookId = this.findBookIdByIsbn(bookDetails.isbn);
+
+    if (duplicatedBookId !== null) {
+      this.restockBookQuantity(duplicatedBookId, quantity);
+
+      return duplicatedBookId;
+    }
+
+    return this.createNewBook(bookDetails, quantity);
+  }
+
+  createNewBook(bookDetails: BookDetails, quantity: number): string {
     const book = new Book(bookDetails);
 
     this.books.set(book.id, {
@@ -44,7 +59,8 @@ export class BookList implements IBookList {
   deleteBook(bookId: string): void {
     const { book } = this.findBookOrThrow(bookId);
 
-    this.books.delete(book.id);
+    book.deletedAt = new Date();
+    book.updatedAt = new Date();
   }
 
   findBookOrThrow(bookId: string): BookInformation {
@@ -56,10 +72,17 @@ export class BookList implements IBookList {
   }
 
   findBookIdByIsbn(isbn: string): string {
-    const bookAlreadyCreated = [...this.books].find(
+    const book = [...this.books].find(
       ([id, bookInformation]) => bookInformation.book.isbn === isbn
     );
 
-    return bookAlreadyCreated ? bookAlreadyCreated[0] : null;
+    return book ? book[0] : null;
+  }
+
+  restockBookQuantity(bookId: string, quantity: number): void {
+    DataValidator.checkIfNotEqualOrBelowZero(quantity);
+
+    const book = this.findBookOrThrow(bookId);
+    book.quantity += quantity;
   }
 }
