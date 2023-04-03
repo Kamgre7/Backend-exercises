@@ -3,47 +3,57 @@ import { dateFormatRegex } from './utils';
 
 export type BookingDetails = {
   userId: string;
-  bookId: string;
+  booksId: string[];
 };
 
-export interface IBooking extends BookingDetails {
+export type BookActive = {
+  isActive: boolean;
+};
+
+export interface IBooking {
   id: string;
+  books: Map<string, BookActive>;
   isActive: boolean;
   createdAt: Date;
-  returnAt: Date;
+  returnedAt: Date;
   setIsNotActive(): void;
   setReturnDate(date?: string): void;
+  setBookIsReturned(booksId: string[]): void;
   getBookDate(): Date;
   getReturnDate(): Date;
 }
 
 export class Booking implements IBooking {
   readonly userId: string;
-  readonly bookId: string;
+  books: Map<string, BookActive>;
   isActive: boolean = true;
   createdAt: Date = new Date();
-  returnAt: Date;
+  returnedAt: Date;
 
   constructor(bookingDetails: BookingDetails, public readonly id = uuid()) {
-    const { bookId, userId } = bookingDetails;
+    const { userId, booksId } = bookingDetails;
 
-    this.verifyId(userId, bookId);
+    this.verifyId(userId, booksId);
 
-    this.bookId = bookId;
     this.userId = userId;
+    this.setBookList(booksId);
   }
 
   setIsNotActive(): void {
-    this.isActive = false;
+    const isAllBooksReturned = [...this.books].every(
+      ([id, bookActive]) => bookActive.isActive === false
+    );
+
+    if (isAllBooksReturned) {
+      this.isActive = false;
+      this.setReturnDate();
+    }
+
+    throw new Error('Some books are not returned yet');
   }
 
   setReturnDate(date?: string): void {
-    this.returnAt =
-      dateFormatRegex.test(date) &&
-      new Date(date) <= new Date() &&
-      new Date(date) > this.createdAt
-        ? new Date(date)
-        : new Date();
+    this.returnedAt = this.checkIfValidDate(date) ? new Date(date) : new Date();
   }
 
   getBookDate(): Date {
@@ -51,12 +61,50 @@ export class Booking implements IBooking {
   }
 
   getReturnDate(): Date {
-    return this.returnAt;
+    return this.returnedAt;
   }
 
-  private verifyId(userId: string, bookId: string): void {
-    if (!validate(userId) || !validate(bookId)) {
-      throw new Error('Invalid id');
+  setBookIsReturned(booksId: string[]): void {
+    booksId.forEach((bookId) => {
+      const book = this.books.get(bookId);
+
+      if (book.isActive) {
+        book.isActive = false;
+      }
+    });
+  }
+
+  private setBookList(bookIdList: string[]): void {
+    bookIdList.forEach((id) => {
+      this.books.set(id, { isActive: true });
+    });
+  }
+
+  private checkIfValidDate(date: string): boolean {
+    return (
+      dateFormatRegex.test(date) &&
+      this.dateEarlierOrEqualCurrentDate(date) &&
+      this.dateLaterThanCreatedAt(date)
+    );
+  }
+
+  private dateEarlierOrEqualCurrentDate(date: string): boolean {
+    return new Date(date) <= new Date();
+  }
+
+  private dateLaterThanCreatedAt(date: string): boolean {
+    return new Date(date) > this.createdAt;
+  }
+
+  private verifyId(userId: string, booksId: string[]): void {
+    if (!validate(userId)) {
+      throw new Error('Invalid user id');
+    }
+
+    const isValidBooksId = booksId.every((id) => validate(id));
+
+    if (!isValidBooksId) {
+      throw new Error('Invalid book id');
     }
   }
 }
