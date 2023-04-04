@@ -5,4 +5,4 @@ export const dateFormatRegex = /^\d{4}[\/.]\d{1,2}[\/.]\d{1,2}$/;
 
 export const DAY_IN_MILLISECONDS = 1000 * 3600 * 24;
 export const BOOKING_TIME = 7;
-export const MONTH_IN_DAYS = 30;
+export const TIME_PERIOD_TO_UNBLOCK = 30;
