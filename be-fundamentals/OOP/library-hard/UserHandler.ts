@@ -1,6 +1,6 @@
 import { IUser } from './User';
 import { UserInformation } from './UserList';
-import { DAY_IN_MILLISECONDS, TIME_PERIOD_TO_UNBLOCK } from './utils';
+import { TIME_PERIOD_TO_UNBLOCK, countDays, currentDate } from './utils';
 
 export interface IUserHandler {
   updateEmail(user: IUser, newEmail: string): void;
@@ -36,15 +36,14 @@ export class UserHandler implements IUserHandler {
   }
 
   activateUser(userInformation: UserInformation): void {
-    const currentDate = new Date();
-    const daysUserBlocked = this.countDays(
-      userInformation.user.blockedAt,
-      currentDate
-    );
-
     if (!this.checkIfBlocked(userInformation.user)) {
       return;
     }
+
+    const daysUserBlocked = countDays(
+      userInformation.user.blockedAt,
+      currentDate()
+    );
 
     if (daysUserBlocked <= TIME_PERIOD_TO_UNBLOCK) {
       throw new Error(
@@ -72,14 +71,5 @@ export class UserHandler implements IUserHandler {
     if (user.deletedAt) {
       throw new Error('Cannot update deleted account');
     }
-  }
-
-  private countDays(from: Date, to: Date): number {
-    const dayFrom = from.getTime();
-    const dayTo = to.getTime();
-
-    const differenceInDays = (dayTo - dayFrom) / DAY_IN_MILLISECONDS;
-
-    return Math.floor(differenceInDays);
   }
 }
