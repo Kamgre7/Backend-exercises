@@ -15,15 +15,19 @@ export class BookHandler implements IBookHandler {
   }
 
   setTitle(book: IBook, newTitle: string): void {
-    book.setAuthor(newTitle);
+    book.setTitle(newTitle);
   }
 
   setIsbn(book: IBook, newIsbn: string): void {
-    book.setAuthor(newIsbn);
+    book.setIsbn(newIsbn);
   }
 
   setQuantity(book: BookInformation, quantity: number): void {
-    DataValidator.checkIfNotEqualOrBelowZero(quantity);
+    DataValidator.checkIfInteger(quantity);
+
+    const sumQuantity = book.quantity + quantity;
+
+    DataValidator.checkIfNotEqualOrBelowZero(sumQuantity);
 
     book.quantity += quantity;
   }
