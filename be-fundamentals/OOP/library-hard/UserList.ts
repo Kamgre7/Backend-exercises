@@ -12,6 +12,7 @@ export interface IUserList {
   deleteUser(userId: string): void;
   findUserOrThrow(userId: string): UserInformation;
   findUserIdByEmail(email: string): string;
+  checkIfEmailAvailableOrThrow(email: string): void;
 }
 
 export class UserList implements IUserList {
@@ -63,5 +64,11 @@ export class UserList implements IUserList {
     );
 
     return user ? user[0] : null;
+  }
+
+  checkIfEmailAvailableOrThrow(email: string): void {
+    if (this.findUserIdByEmail(email)) {
+      throw new Error('The email address already taken');
+    }
   }
 }
