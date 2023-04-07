@@ -1,5 +1,4 @@
 import { Book, BookDetails, IBook } from './Book';
-import { DataValidator } from './DataValidator';
 import { bookDB } from './libraryDB';
 
 export type BookInformation = {
@@ -10,11 +9,11 @@ export type BookInformation = {
 export interface IBookList {
   books: Map<string, BookInformation>;
   addBook(bookDetails: BookDetails, quantity: number): string;
-  createNewBook(bookDetails: BookDetails, quantity: number): string;
-  restockBookQuantity(bookId: string, quantity: number): void;
   deleteBook(bookId: string): void;
   findBookIdByIsbn(isbn: string): string;
   findBookOrThrow(bookId: string): BookInformation;
+  findAvailableBooksById(booksId: string[]): string[];
+  checkIfNotDeleted(book: IBook): void;
 }
 
 export class BookList implements IBookList {
@@ -31,21 +30,6 @@ export class BookList implements IBookList {
   }
 
   addBook(bookDetails: BookDetails, quantity: number): string {
-    DataValidator.checkIfNotEqualOrBelowZero(quantity);
-    DataValidator.checkIfInteger(quantity);
-
-    const duplicatedBookId = this.findBookIdByIsbn(bookDetails.isbn);
-
-    if (duplicatedBookId !== null) {
-      this.restockBookQuantity(duplicatedBookId, quantity);
-
-      return duplicatedBookId;
-    }
-
-    return this.createNewBook(bookDetails, quantity);
-  }
-
-  createNewBook(bookDetails: BookDetails, quantity: number): string {
     const book = new Book(bookDetails);
 
     this.books.set(book.id, {
@@ -59,8 +43,20 @@ export class BookList implements IBookList {
   deleteBook(bookId: string): void {
     const { book } = this.findBookOrThrow(bookId);
 
+    this.checkIfNotDeleted;
+
     book.deletedAt = new Date();
     book.updatedAt = new Date();
+  }
+
+  findAvailableBooksById(booksId: string[]): string[] {
+    const availableBooksId = booksId.filter((id) => {
+      const book = this.findBookOrThrow(id);
+
+      return book.quantity < 1 || book.book.deletedAt ? false : true;
+    });
+
+    return availableBooksId;
   }
 
   findBookOrThrow(bookId: string): BookInformation {
@@ -79,10 +75,9 @@ export class BookList implements IBookList {
     return book ? book[0] : null;
   }
 
-  restockBookQuantity(bookId: string, quantity: number): void {
-    DataValidator.checkIfNotEqualOrBelowZero(quantity);
-
-    const book = this.findBookOrThrow(bookId);
-    book.quantity += quantity;
+  checkIfNotDeleted(book: IBook): void {
+    if (book.deletedAt) {
+      throw new Error('Book already deleted');
+    }
   }
 }
