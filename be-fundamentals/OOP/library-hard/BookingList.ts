@@ -4,7 +4,7 @@ import { bookingDB } from './libraryDB';
 export interface IBookingList {
   bookings: Map<string, IBooking>;
   addBooking(bookingDetails: BookingDetails): string;
-  findBooking(bookingId: string): IBooking;
+  findBookingOrThrow(bookingId: string): IBooking;
 }
 
 export class BookingList implements IBookingList {
@@ -23,7 +23,7 @@ export class BookingList implements IBookingList {
   addBooking(bookingDetails: BookingDetails): string {
     const booking = new Booking({
       userId: bookingDetails.userId,
-      bookId: bookingDetails.bookId,
+      booksId: bookingDetails.booksId,
     });
 
     this.bookings.set(booking.id, booking);
@@ -31,7 +31,7 @@ export class BookingList implements IBookingList {
     return booking.id;
   }
 
-  findBooking(bookingId: string): IBooking {
+  findBookingOrThrow(bookingId: string): IBooking {
     if (!this.bookings.has(bookingId)) {
       throw new Error('Booking not found');
     }
