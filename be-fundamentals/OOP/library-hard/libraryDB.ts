@@ -20,7 +20,7 @@ const user = new User('user@library.com');
 const admin = new User('admin@library.com');
 
 const harryPotterBooking = new Booking({
-  bookId: harryPotter.id,
+  booksId: [harryPotter.id],
   userId: user.id,
 });
 
