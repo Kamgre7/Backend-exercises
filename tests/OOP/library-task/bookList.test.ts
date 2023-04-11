@@ -69,12 +69,12 @@ describe('BookList', () => {
     expect(bookList.books.has(bookId)).toBeTruthy();
   });
 
-  it('Should delete a book', () => {
-    expect(bookList.books.has(hpInformation.book.id)).toBeTruthy();
+  it('Should soft delete a book', () => {
+    expect(hpInformation.book.deletedAt).toBeUndefined();
 
     bookList.deleteBook(hpInformation.book.id);
 
-    expect(bookList.books.has(hpInformation.book.id)).toBeFalsy();
+    expect(hpInformation.book.deletedAt).toBeDefined();
   });
 
   it('Should find a book using bookId and return it', () => {
@@ -83,11 +83,20 @@ describe('BookList', () => {
     expect(hpInformation).toStrictEqual(book);
   });
 
-  it('Should find a book ID and return it using isbn number, if not return null', () => {
+  it('Should find a book ID and return it using isbn number', () => {
     const book = bookList.findBookIdByIsbn(hpInformation.book.isbn);
 
     expect(book).toBe(hpInformation.book.id);
     expect(bookList.findBookIdByIsbn('543ABD')).toBeNull();
+  });
+
+  it('Should return array of available books ID - book quantity > 1, book not deleted and book ID exist', () => {
+    const booksId = [harryPotter.id, lordOfTheRings.id, '1234', '4321'];
+
+    expect(bookList.findAvailableBooksById(booksId)).toStrictEqual([
+      harryPotter.id,
+      lordOfTheRings.id,
+    ]);
   });
 
   describe('It should throw error when', () => {
@@ -142,6 +151,14 @@ describe('BookList', () => {
     it('Should throw error when book is not found', () => {
       expect(() => {
         bookList.findBookOrThrow('1234');
+      }).toThrow();
+    });
+
+    it('Should throw error when book is deleted', () => {
+      harryPotter.deletedAt = new Date();
+
+      expect(() => {
+        bookList.checkIfNotDeletedOrThrow(harryPotter);
       }).toThrow();
     });
   });
