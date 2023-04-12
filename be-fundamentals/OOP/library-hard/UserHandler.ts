@@ -17,7 +17,7 @@ export interface IUserHandler {
     pointsToAdd: number
   ): void;
   activateUser(userInformation: UserInformation): void;
-  calculatePenaltyPoints(user: UserInformation, daysPassed: number): void;
+  calculatePenaltyPoints(user: UserInformation, bookingDate: Date): void;
   checkIfUserNotDeletedOrThrow(userInformation: UserInformation): void;
   checkIfBlockUser(userInformation: UserInformation): void;
   checkIfUserNotBlockedOrThrow(user: IUser): void;
@@ -63,9 +63,11 @@ export class UserHandler implements IUserHandler {
     userInformation.user.blockedAt = null;
   }
 
-  calculatePenaltyPoints(user: UserInformation, daysPassed: number): void {
-    if (daysPassed > ALLOWED_BOOKING_TIME) {
-      const penaltyPointsToAdd = daysPassed - ALLOWED_BOOKING_TIME;
+  calculatePenaltyPoints(user: UserInformation, bookingDate: Date): void {
+    const bookingDaysPassed = countDays(bookingDate, currentDate());
+
+    if (bookingDaysPassed > ALLOWED_BOOKING_TIME) {
+      const penaltyPointsToAdd = bookingDaysPassed - ALLOWED_BOOKING_TIME;
 
       this.setUserPenaltyPoints(user, penaltyPointsToAdd);
     }

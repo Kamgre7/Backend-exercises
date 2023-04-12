@@ -1,4 +1,5 @@
 import { Book, BookDetails, IBook } from './Book';
+import { DataValidator } from './DataValidator';
 import { bookDB } from './libraryDB';
 
 export type BookInformation = {
@@ -12,8 +13,9 @@ export interface IBookList {
   deleteBook(bookId: string): void;
   findBookIdByIsbn(isbn: string): string;
   findBookOrThrow(bookId: string): BookInformation;
+  findBook(bookId: string): BookInformation;
   findAvailableBooksById(booksId: string[]): string[];
-  checkIfNotDeleted(book: IBook): void;
+  checkIfNotDeletedOrThrow(book: IBook): void;
 }
 
 export class BookList implements IBookList {
@@ -30,6 +32,8 @@ export class BookList implements IBookList {
   }
 
   addBook(bookDetails: BookDetails, quantity: number): string {
+    DataValidator.checkIfNotEqualOrBelowZero(quantity);
+
     const book = new Book(bookDetails);
 
     this.books.set(book.id, {
@@ -43,7 +47,7 @@ export class BookList implements IBookList {
   deleteBook(bookId: string): void {
     const { book } = this.findBookOrThrow(bookId);
 
-    this.checkIfNotDeleted;
+    this.checkIfNotDeletedOrThrow;
 
     book.deletedAt = new Date();
     book.updatedAt = new Date();
@@ -51,9 +55,11 @@ export class BookList implements IBookList {
 
   findAvailableBooksById(booksId: string[]): string[] {
     const availableBooksId = booksId.filter((id) => {
-      const book = this.findBookOrThrow(id);
+      const book = this.findBook(id);
 
-      return book.quantity < 1 || book.book.deletedAt ? false : true;
+      return book === null || book.quantity < 1 || book.book.deletedAt
+        ? false
+        : true;
     });
 
     return availableBooksId;
@@ -67,6 +73,10 @@ export class BookList implements IBookList {
     return this.books.get(bookId);
   }
 
+  findBook(bookId: string): BookInformation {
+    return this.books.has(bookId) ? this.books.get(bookId) : null;
+  }
+
   findBookIdByIsbn(isbn: string): string {
     const book = [...this.books].find(
       ([id, bookInformation]) => bookInformation.book.isbn === isbn
@@ -75,7 +85,7 @@ export class BookList implements IBookList {
     return book ? book[0] : null;
   }
 
-  checkIfNotDeleted(book: IBook): void {
+  checkIfNotDeletedOrThrow(book: IBook): void {
     if (book.deletedAt) {
       throw new Error('Book already deleted');
     }

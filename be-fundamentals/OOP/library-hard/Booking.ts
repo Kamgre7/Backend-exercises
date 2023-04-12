@@ -28,7 +28,7 @@ export interface IBooking {
 
 export class Booking implements IBooking {
   readonly userId: string;
-  books: Map<string, BookActive>;
+  books: Map<string, BookActive> = new Map<string, BookActive>();
   isActive: boolean = true;
   createdAt: Date = new Date();
   returnedAt: Date;
@@ -43,12 +43,12 @@ export class Booking implements IBooking {
   }
 
   setIsNotActive(): void {
-    if (this.checkIfAllBooksReturned()) {
-      this.isActive = false;
-      this.setReturnDate();
+    if (!this.checkIfAllBooksReturned()) {
+      throw new Error('Some books are not returned yet');
     }
 
-    throw new Error('Some books are not returned yet');
+    this.isActive = false;
+    this.setReturnDate();
   }
 
   setReturnDate(date?: string): void {

@@ -29,6 +29,8 @@ export class UserList implements IUserList {
   }
 
   addUser(email: string): string {
+    this.checkIfEmailAvailableOrThrow(email);
+
     const user = new User(email);
 
     this.users.set(user.id, {

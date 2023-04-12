@@ -21,6 +21,7 @@ export class BookingHandler implements IBookingHandler {
   }
 
   setBooksAreReturned(booking: IBooking, booksId: string[]): void {
+    this.checkIfBooksAreActive(booking, booksId);
     booking.setBooksAreReturned(booksId);
   }
 
