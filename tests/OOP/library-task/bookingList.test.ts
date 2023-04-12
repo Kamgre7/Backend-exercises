@@ -10,20 +10,16 @@ import { User } from '../../../be-fundamentals/OOP/library-hard/User';
 let harryPotter: Book;
 let lordOfTheRings: Book;
 let john: User;
-let kate: User;
 let bookingList: BookingList;
 let bookings: Map<string, IBooking>;
-let hpBookingDetails: BookingDetails;
-let lotrBookingDetails: BookingDetails;
-let hpBookingInformation: Booking;
-let lotrBookingInformation: Booking;
+let johnBookingDetails: BookingDetails;
+let johnBooking: Booking;
 
 beforeAll(() => {
   bookingList = BookingList.getInstance(bookings);
 });
 
 beforeEach(() => {
-  kate = new User('kate@example.com');
   john = new User('john@example.com');
 
   harryPotter = new Book({
@@ -38,23 +34,14 @@ beforeEach(() => {
     isbn: '4321',
   });
 
-  hpBookingDetails = {
-    bookId: harryPotter.id,
-    userId: kate.id,
-  };
-
-  lotrBookingDetails = {
-    bookId: lordOfTheRings.id,
+  johnBookingDetails = {
+    booksId: [harryPotter.id, lordOfTheRings.id],
     userId: john.id,
   };
 
-  hpBookingInformation = new Booking(hpBookingDetails);
-  lotrBookingInformation = new Booking(lotrBookingDetails);
+  johnBooking = new Booking(johnBookingDetails);
 
-  bookings = new Map([
-    [hpBookingInformation.id, hpBookingInformation],
-    [lotrBookingInformation.id, lotrBookingInformation],
-  ]);
+  bookings = new Map<string, IBooking>([[johnBooking.id, johnBooking]]);
 
   bookingList.bookings = bookings;
 });
@@ -73,7 +60,7 @@ describe('BookingList', () => {
   it('Should add a new booking', () => {
     const bookingDetails = {
       userId: john.id,
-      bookId: harryPotter.id,
+      booksId: [harryPotter.id],
     };
 
     const newBookingId = bookingList.addBooking(bookingDetails);
@@ -82,15 +69,15 @@ describe('BookingList', () => {
   });
 
   it('Should find a booking by ID and return it', () => {
-    const booking = bookingList.findBooking(hpBookingInformation.id);
+    const booking = bookingList.findBookingOrThrow(johnBooking.id);
 
-    expect(booking).toStrictEqual(hpBookingInformation);
+    expect(booking).toStrictEqual(johnBooking);
   });
 
   describe('Should throw error when', () => {
     it('Should throw error when booking not found', () => {
       expect(() => {
-        bookingList.findBooking('12345');
+        bookingList.findBookingOrThrow('12345');
       }).toThrow();
     });
 
@@ -98,7 +85,7 @@ describe('BookingList', () => {
       expect(() => {
         bookingList.addBooking({
           userId: '1234',
-          bookId: harryPotter.id,
+          booksId: [harryPotter.id],
         });
       }).toThrow();
     });
@@ -107,7 +94,7 @@ describe('BookingList', () => {
       expect(() => {
         new Booking({
           userId: john.id,
-          bookId: '4321',
+          booksId: ['4321'],
         });
       }).toThrow();
     });
