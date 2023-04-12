@@ -71,22 +71,3 @@ export class Book implements IBook {
     }
   }
 }
-
-// type BookDetailsKey = keyof BookDetails;
-/*   changeProperty(key: BookDetailsKey, value: string) {
-    this.checkIfNotEmptyString(value, key);
-    this[key] = value;
-    this.updateDate();
-  } */
-
-/* const sth = {
-  test: 'test',
-  test2: 'test2',
-} as const;
-
-type sth = typeof sth[keyof typeof sth];
-
-const myFunct = (sth: sth) => {};
-
-myFunct('test');
- */
