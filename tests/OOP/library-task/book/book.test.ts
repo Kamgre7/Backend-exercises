@@ -1,4 +1,4 @@
-import { Book } from '../../../be-fundamentals/OOP/library-hard/Book';
+import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 
 let book: Book;
 

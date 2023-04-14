@@ -1,6 +1,6 @@
-import { Book } from '../../../be-fundamentals/OOP/library-hard/Book';
-import { BookHandler } from '../../../be-fundamentals/OOP/library-hard/BookHandler';
-import { BookInformation } from '../../../be-fundamentals/OOP/library-hard/BookList';
+import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import { BookHandler } from '../../../../be-fundamentals/OOP/library-hard/Book/BookHandler';
+import { BookInformation } from '../../../../be-fundamentals/OOP/library-hard/Book/BookList';
 
 let bookHandler: BookHandler;
 let harryPotter: Book;

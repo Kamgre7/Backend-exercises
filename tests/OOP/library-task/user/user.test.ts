@@ -1,4 +1,4 @@
-import { User } from '../../../be-fundamentals/OOP/library-hard/User';
+import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
 
 let user: User;
 

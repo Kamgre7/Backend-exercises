@@ -1,8 +1,8 @@
-import { User } from '../../../be-fundamentals/OOP/library-hard/User';
+import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
 import {
-  UserList,
   UserInformation,
-} from '../../../be-fundamentals/OOP/library-hard/UserList';
+  UserList,
+} from '../../../../be-fundamentals/OOP/library-hard/User/UserList';
 
 let userList: UserList;
 let users: Map<string, UserInformation>;
@@ -56,7 +56,7 @@ describe('UserList', () => {
   });
 
   it('Should find a user', () => {
-    const user = userList.findUserOrThrow(john.id);
+    const user = userList.findUserByIdOrThrow(john.id);
 
     expect(user).toStrictEqual(johnInformation);
   });
@@ -69,9 +69,9 @@ describe('UserList', () => {
   });
 
   it('Should find a user using email', () => {
-    const userId = userList.findUserIdByEmail(john.email);
+    const userInformation = userList.findUserByEmail(john.email);
 
-    expect(userId).toBe(john.id);
+    expect(userInformation).toBe(johnInformation);
   });
 
   describe('Should throw error when', () => {
@@ -95,7 +95,7 @@ describe('UserList', () => {
 
     it('Should throw error when user is not found', () => {
       expect(() => {
-        userList.findUserOrThrow('12345');
+        userList.findUserByIdOrThrow('12345');
       }).toThrow();
     });
 

@@ -22,7 +22,7 @@ export class Book implements IBook {
   isbn: string;
   createdAt: Date = new Date();
   updatedAt: Date;
-  deletedAt: Date;
+  deletedAt: Date | null;
 
   constructor(bookDetails: BookDetails, public readonly id = uuid()) {
     this.validateNewBook(bookDetails);

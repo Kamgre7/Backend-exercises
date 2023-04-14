@@ -1,6 +1,6 @@
-import { User } from '../../../be-fundamentals/OOP/library-hard/User';
-import { UserHandler } from '../../../be-fundamentals/OOP/library-hard/UserHandler';
-import { UserInformation } from '../../../be-fundamentals/OOP/library-hard/UserList';
+import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import { UserHandler } from '../../../../be-fundamentals/OOP/library-hard/User/UserHandler';
+import { UserInformation } from '../../../../be-fundamentals/OOP/library-hard/User/UserList';
 
 let userHandler: UserHandler;
 let john: User;
@@ -82,7 +82,9 @@ describe('UserHandler', () => {
     const bookingDate = new Date();
     bookingDate.setDate(bookingDate.getDate() - 12);
 
-    userHandler.calculatePenaltyPoints(kateInformation, bookingDate);
+    const pointsToAdd = userHandler.calculatePenaltyPoints(bookingDate);
+
+    userHandler.setUserPenaltyPoints(kateInformation, pointsToAdd);
 
     expect(kateInformation.penaltyPoints).toEqual(5);
   });
