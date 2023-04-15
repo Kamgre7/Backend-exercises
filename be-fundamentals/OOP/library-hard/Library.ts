@@ -1,19 +1,15 @@
-import { BookDetails } from './Book';
-import { BookHandler, IBookHandler } from './BookHandler';
-import { BookingHandler, IBookingHandler } from './BookingHandler';
-import { BookingList, IBookingList } from './BookingList';
-import { BookList, IBookList } from './BookList';
-import { IUser } from './User';
-import { IUserHandler, UserHandler } from './UserHandler';
-import { IUserList, UserInformation, UserList } from './UserList';
+import { BookDetails } from './Book/Book';
+import { BookHandler, IBookHandler } from './Book/BookHandler';
+import { BookingHandler, IBookingHandler } from './Booking/BookingHandler';
+import { BookingList, IBookingList } from './Booking/BookingList';
+import { BookList, IBookList } from './Book/BookList';
+import { bookDB, bookingDB, userDB } from './utils/libraryDB';
+import { IUser } from './User/User';
+import { IUserHandler, UserHandler } from './User/UserHandler';
+import { IUserList, UserInformation, UserList } from './User/UserList';
+import { IBooking } from './Booking/Booking';
 
 export interface ILibrary {
-  bookList: IBookList;
-  bookHandler: IBookHandler;
-  userList: IUserList;
-  userHandler: IUserHandler;
-  bookingList: IBookingList;
-  bookingHandler: IBookingHandler;
   addBook(bookDetails: BookDetails, quantity: number): string;
   deleteBook(bookId: string): void;
   setBookAuthor(bookId: string, newAuthor: string): void;
@@ -24,43 +20,52 @@ export interface ILibrary {
   setUserEmail(userId: string, newEmail: string): void;
   blockUser(userId: string): void;
   activateUser(userId: string): void;
-  rentBook(userId: string, booksId: string[]): string;
-  returnBook(bookingId: string, booksId: string[]): void;
+  rentBook(userId: string, bookIds: string[]): string;
+  returnBook(bookingId: string, bookIds: string[]): void;
 }
 
 export class Library implements ILibrary {
   private static instance: Library;
-  bookHandler: IBookHandler = new BookHandler();
-  userHandler: IUserHandler = new UserHandler();
-  bookingHandler: IBookingHandler = new BookingHandler();
 
   private constructor(
-    public bookList = BookList.getInstance(),
-    public userList = UserList.getInstance(),
-    public bookingList = BookingList.getInstance()
+    private readonly bookHandler: IBookHandler,
+    private readonly userHandler: IUserHandler,
+    private readonly bookingHandler: IBookingHandler,
+
+    private bookList: IBookList,
+    private userList: IUserList,
+    private bookingList: IBookingList
   ) {}
 
   static getInstance(
-    bookList?: IBookList,
-    userList?: IUserList,
-    bookingList?: IBookingList
+    bookHandler: IBookHandler,
+    userHandler: IUserHandler,
+    bookingHandler: IBookingHandler,
+    bookList: IBookList = BookList.getInstance(),
+    userList: IUserList = UserList.getInstance(),
+    bookingList: IBookingList = BookingList.getInstance()
   ): Library {
     if (!Library.instance) {
-      Library.instance = new Library(bookList, userList, bookingList);
+      Library.instance = new Library(
+        bookHandler,
+        userHandler,
+        bookingHandler,
+        bookList,
+        userList,
+        bookingList
+      );
     }
 
     return Library.instance;
   }
 
   addBook(bookDetails: BookDetails, quantity: number): string {
-    const bookId = this.bookList.findBookIdByIsbn(bookDetails.isbn);
+    const bookInformation = this.bookList.findBookByIsbn(bookDetails.isbn);
 
-    if (bookId !== null) {
-      const book = this.bookList.findBookOrThrow(bookId);
+    if (bookInformation !== null) {
+      this.bookHandler.setQuantity(bookInformation, quantity);
 
-      this.bookHandler.setQuantity(book, quantity);
-
-      return bookId;
+      return bookInformation.book.id;
     }
 
     return this.bookList.addBook(bookDetails, quantity);
@@ -71,32 +76,30 @@ export class Library implements ILibrary {
   }
 
   setBookAuthor(bookId: string, newAuthor: string): void {
-    const { book } = this.bookList.findBookOrThrow(bookId);
+    const { book } = this.bookList.findBookByIdOrThrow(bookId);
 
     this.bookHandler.setAuthor(book, newAuthor);
   }
 
   setBookTitle(bookId: string, newTitle: string): void {
-    const { book } = this.bookList.findBookOrThrow(bookId);
+    const { book } = this.bookList.findBookByIdOrThrow(bookId);
 
     this.bookHandler.setTitle(book, newTitle);
   }
 
   setBookIsbn(bookId: string, newIsbn: string): void {
-    const { book } = this.bookList.findBookOrThrow(bookId);
+    const { book } = this.bookList.findBookByIdOrThrow(bookId);
 
     this.bookHandler.setIsbn(book, newIsbn);
   }
 
   addUser(email: string): string {
-    const userId = this.userList.findUserIdByEmail(email);
+    const userInformation = this.userList.findUserByEmail(email);
 
-    if (userId !== null) {
-      const { user } = this.userList.findUserOrThrow(userId);
+    if (userInformation !== null) {
+      this.tryToActivateUserAccount(userInformation.user);
 
-      this.tryToActivateUserAccount(user);
-
-      return userId;
+      return userInformation.user.id;
     }
 
     return this.userList.addUser(email);
@@ -107,60 +110,61 @@ export class Library implements ILibrary {
   }
 
   setUserEmail(userId: string, newEmail: string): void {
-    const { user } = this.userList.findUserOrThrow(userId);
+    const { user } = this.userList.findUserByIdOrThrow(userId);
 
     this.userList.checkIfEmailAvailableOrThrow(newEmail);
     this.userHandler.updateEmail(user, newEmail);
   }
 
   blockUser(userId: string): void {
-    const { user } = this.userList.findUserOrThrow(userId);
+    const { user } = this.userList.findUserByIdOrThrow(userId);
 
     this.userHandler.blockUser(user);
   }
 
   activateUser(userId: string): void {
-    const user = this.userList.findUserOrThrow(userId);
+    const userInformation = this.userList.findUserByIdOrThrow(userId);
 
-    this.userHandler.activateUser(user);
+    this.userHandler.activateUser(userInformation);
   }
 
-  rentBook(userId: string, booksId: string[]): string {
-    const userInformation = this.userList.findUserOrThrow(userId);
+  rentBook(userId: string, bookIds: string[]): string {
+    const userInformation = this.userList.findUserByIdOrThrow(userId);
 
     this.userHandler.checkIfUserNotDeletedOrThrow(userInformation);
     this.ifUserBlockedTryActivate(userInformation);
 
-    const availableBooksId = this.bookList.findAvailableBooksById(booksId);
+    const availableBookIds = this.bookList.findAvailableBooksById(bookIds);
 
     const bookingId = this.bookingList.addBooking({
-      booksId: availableBooksId,
+      bookIds: availableBookIds,
       userId: userInformation.user.id,
     });
 
-    this.changeBookQuantity(availableBooksId, -1);
+    this.changeBookQuantity(availableBookIds, -1);
 
     return bookingId;
   }
 
-  returnBook(bookingId: string, booksId: string[]): void {
-    const booking = this.bookingList.findBookingOrThrow(bookingId);
+  returnBook(bookingId: string, bookIds: string[]): void {
+    const booking = this.bookingList.findBookingByIdOrThrow(bookingId);
 
     this.bookingHandler.checkIfBookingActiveOrThrow(booking);
 
-    const user = this.userList.findUserOrThrow(booking.userId);
+    const userInformation = this.userList.findUserByIdOrThrow(booking.userId);
 
-    this.bookingHandler.verifyTheBooksToBeReturned(booking, booksId);
+    this.bookingHandler.verifyTheBooksToBeReturned(booking, bookIds);
 
-    this.bookingHandler.setBooksAreReturned(booking, booksId);
+    this.bookingHandler.setBooksAreReturned(booking, bookIds);
 
-    this.changeBookQuantity(booksId, 1);
+    this.changeBookQuantity(bookIds, 1);
+
+    this.calculateAndAddPenaltyPoints(userInformation, booking, bookIds);
+
+    this.userHandler.checkIfBlockUser(userInformation);
 
     if (this.bookingHandler.checkIfAllBooksReturned(booking)) {
       this.bookingHandler.setIsNotActive(booking);
-
-      this.userHandler.calculatePenaltyPoints(user, booking.getBookDate());
-      this.userHandler.checkIfBlockUser(user);
     }
   }
 
@@ -175,11 +179,41 @@ export class Library implements ILibrary {
     }
   }
 
-  private changeBookQuantity(booksId: string[], value: number): void {
-    booksId.forEach((id) => {
-      const book = this.bookList.findBookOrThrow(id);
+  private changeBookQuantity(bookIds: string[], value: number): void {
+    bookIds.forEach((id) => {
+      const book = this.bookList.findBookByIdOrThrow(id);
 
       this.bookHandler.setQuantity(book, value);
     });
   }
+
+  private calculateAndAddPenaltyPoints(
+    userInformation: UserInformation,
+    booking: IBooking,
+    bookIds: string[]
+  ) {
+    bookIds.forEach((bookId) => {
+      const bookingBookReturnedDate = booking.books.get(bookId).returnedAt;
+
+      const penaltyPointsToAdd = this.userHandler.calculatePenaltyPoints(
+        bookingBookReturnedDate
+      );
+
+      if (penaltyPointsToAdd > 0) {
+        this.userHandler.setUserPenaltyPoints(
+          userInformation,
+          penaltyPointsToAdd
+        );
+      }
+    });
+  }
 }
+
+const library = Library.getInstance(
+  new BookHandler(),
+  new UserHandler(),
+  new BookingHandler(),
+  BookList.getInstance(bookDB),
+  UserList.getInstance(userDB),
+  BookingList.getInstance(bookingDB)
+);

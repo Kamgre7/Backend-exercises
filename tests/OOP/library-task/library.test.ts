@@ -1,20 +1,23 @@
-import { Book } from '../../../be-fundamentals/OOP/library-hard/Book';
+import { Book } from '../../../be-fundamentals/OOP/library-hard/Book/Book';
 import {
   Booking,
   BookingDetails,
   IBooking,
-} from '../../../be-fundamentals/OOP/library-hard/Booking';
-import { BookingList } from '../../../be-fundamentals/OOP/library-hard/BookingList';
+} from '../../../be-fundamentals/OOP/library-hard/Booking/Booking';
 import {
   BookInformation,
   BookList,
-} from '../../../be-fundamentals/OOP/library-hard/BookList';
+} from '../../../be-fundamentals/OOP/library-hard/Book/BookList';
 import { Library } from '../../../be-fundamentals/OOP/library-hard/Library';
-import { User } from '../../../be-fundamentals/OOP/library-hard/User';
+import { User } from '../../../be-fundamentals/OOP/library-hard/User/User';
 import {
   UserInformation,
   UserList,
-} from '../../../be-fundamentals/OOP/library-hard/UserList';
+} from '../../../be-fundamentals/OOP/library-hard/User/UserList';
+import { BookingList } from '../../../be-fundamentals/OOP/library-hard/Booking/BookingList';
+import { BookHandler } from '../../../be-fundamentals/OOP/library-hard/Book/BookHandler';
+import { UserHandler } from '../../../be-fundamentals/OOP/library-hard/User/UserHandler';
+import { BookingHandler } from '../../../be-fundamentals/OOP/library-hard/Booking/BookingHandler';
 
 let john: User;
 let kate: User;
@@ -32,10 +35,10 @@ let lotrInformation: BookInformation;
 
 let bookingList: BookingList;
 let bookings: Map<string, IBooking>;
-let hpBookingDetails: BookingDetails;
-let lotrBookingDetails: BookingDetails;
-let hpBookingInformation: Booking;
-let lotrBookingInformation: Booking;
+let kateBookingDetails: BookingDetails;
+let johnBookingDetails: BookingDetails;
+let kateBooking: Booking;
+let johnBooking: Booking;
 
 let library: Library;
 
@@ -44,7 +47,14 @@ beforeAll(() => {
   userList = UserList.getInstance(users);
   bookingList = BookingList.getInstance(bookings);
 
-  library = Library.getInstance(bookList, userList, bookingList);
+  library = Library.getInstance(
+    new BookHandler(),
+    new UserHandler(),
+    new BookingHandler(),
+    bookList,
+    userList,
+    bookingList
+  );
 });
 
 beforeEach(() => {
@@ -52,7 +62,6 @@ beforeEach(() => {
 
   kateInformation = {
     user: kate,
-    isActive: true,
     penaltyPoints: 0,
   };
 
@@ -60,7 +69,6 @@ beforeEach(() => {
 
   johnInformation = {
     user: john,
-    isActive: true,
     penaltyPoints: 0,
   };
 
@@ -96,31 +104,27 @@ beforeEach(() => {
     [lordOfTheRings.id, lotrInformation],
   ]);
 
-  hpBookingDetails = {
-    bookId: harryPotter.id,
+  kateBookingDetails = {
+    bookIds: [harryPotter.id, lordOfTheRings.id],
     userId: kate.id,
   };
 
-  lotrBookingDetails = {
-    bookId: lordOfTheRings.id,
+  johnBookingDetails = {
+    bookIds: [lordOfTheRings.id],
     userId: john.id,
   };
 
-  hpBookingInformation = new Booking(hpBookingDetails);
-  lotrBookingInformation = new Booking(lotrBookingDetails);
+  kateBooking = new Booking(kateBookingDetails);
+  johnBooking = new Booking(johnBookingDetails);
 
   bookings = new Map([
-    [hpBookingInformation.id, hpBookingInformation],
-    [lotrBookingInformation.id, lotrBookingInformation],
+    [kateBooking.id, kateBooking],
+    [johnBooking.id, johnBooking],
   ]);
 
   userList.users = users;
   bookList.books = books;
   bookingList.bookings = bookings;
-
-  library.bookList = bookList;
-  library.bookingList = bookingList;
-  library.userList = userList;
 });
 
 describe('Library', () => {
@@ -129,7 +133,11 @@ describe('Library', () => {
   });
 
   it('Should return already created library instance, after trying to create a new instance of Library', () => {
-    const secondLibrary = Library.getInstance();
+    const secondLibrary = Library.getInstance(
+      new BookHandler(),
+      new UserHandler(),
+      new BookingHandler()
+    );
 
     expect(library).toStrictEqual(secondLibrary);
   });
@@ -144,10 +152,10 @@ describe('Library', () => {
 
       const newBookId = library.addBook(bookDetails, 5);
 
-      expect(library.bookList.books.has(newBookId)).toBeTruthy();
+      expect(bookList.books.has(newBookId)).toBeTruthy();
     });
 
-    it('Should increase book quantity when book is already in library', () => {
+    it('Should increase book quantity when book is already in library from 5 t0 10', () => {
       const bookDetails = {
         author: 'unknown',
         title: 'Train',
@@ -155,18 +163,21 @@ describe('Library', () => {
       };
 
       const newBookId = library.addBook(bookDetails, 5);
-      const secondNewBookId = library.addBook(bookDetails, 5);
-      const book = library.bookList.books.get(newBookId);
+      library.addBook(bookDetails, 5);
 
-      expect(book).toHaveProperty('quantity', 10);
+      const book = bookList.books.get(newBookId);
+
+      expect(book.quantity).toEqual(10);
     });
 
-    it('Should delete book from bookList', () => {
-      expect(library.bookList.books.has(hpInformation.book.id)).toBeTruthy();
+    it('Should soft delete book from bookList', () => {
+      const bookInformation = bookList.books.get(hpInformation.book.id);
+
+      expect(bookInformation.book.deletedAt).toBeUndefined();
 
       library.deleteBook(hpInformation.book.id);
 
-      expect(library.bookList.books.has(hpInformation.book.id)).toBeFalsy();
+      expect(bookInformation.book.deletedAt).toBeDefined();
     });
 
     it('Should set a book author', () => {
@@ -192,7 +203,26 @@ describe('Library', () => {
     it('Should add a new user', () => {
       const newUserId = library.addUser('user@example.com');
 
-      expect(library.userList.users.has(newUserId)).toBeTruthy();
+      expect(userList.users.has(newUserId)).toBeTruthy();
+    });
+
+    it('Should soft delete a user', () => {
+      expect(kate.deletedAt).toBeUndefined();
+
+      library.deleteUser(kate.id);
+
+      expect(kate.deletedAt).toBeDefined();
+    });
+
+    it('Should reactive soft deleted user if user want register again this same email', () => {
+      const userId = library.addUser('reactive@example.com');
+      const userInformation = userList.users.get(userId);
+
+      library.deleteUser(userId);
+      expect(userInformation.user.deletedAt).toBeDefined();
+
+      library.addUser('reactive@example.com');
+      expect(userInformation.user.deletedAt).toBeNull();
     });
 
     it('Should set a user email', () => {
@@ -202,22 +232,22 @@ describe('Library', () => {
     });
 
     it('Should block a user', () => {
-      expect(johnInformation.isActive).toBeTruthy();
+      expect(johnInformation.user.blockedAt).toBeUndefined();
 
       library.blockUser(john.id);
 
-      expect(johnInformation.isActive).toBeFalsy();
+      expect(johnInformation.user.blockedAt).toBeDefined();
     });
 
-    it('Should activate a user', () => {
+    it('Should activate blocked user', () => {
       library.blockUser(john.id);
-
-      expect(johnInformation.isActive).toBeFalsy();
-
       johnInformation.user.blockedAt = new Date('2022-02-02');
+
+      expect(johnInformation.user.blockedAt).toBeDefined();
+
       library.activateUser(john.id);
 
-      expect(johnInformation.isActive).toBeTruthy();
+      expect(johnInformation.user.blockedAt).toBeNull();
     });
   });
 
@@ -225,20 +255,150 @@ describe('Library', () => {
     it('Should add a new booking and decrease book quantity by one', () => {
       expect(hpInformation.quantity).toBe(10);
 
-      const newBookingId = library.rentBook(harryPotter.id, john.id);
+      const newBookingId = library.rentBook(john.id, [harryPotter.id]);
 
       expect(hpInformation.quantity).toBe(9);
-      expect(library.bookingList.bookings.has(newBookingId)).toBeTruthy();
+      expect(bookingList.bookings.has(newBookingId)).toBeTruthy();
     });
 
-    it('Should return a book, increase book quantity by one', () => {
+    it('Should return books, increase books quantity by one, and change booking status - isActive - false', () => {
       expect(hpInformation.quantity).toBe(10);
-      expect(hpBookingInformation.isActive).toBeTruthy();
+      expect(lotrInformation.quantity).toBe(5);
 
-      library.returnBook(hpBookingInformation.id);
+      library.returnBook(kateBooking.id, [harryPotter.id, lordOfTheRings.id]);
 
       expect(hpInformation.quantity).toBe(11);
-      expect(hpBookingInformation.isActive).toBeFalsy();
+      expect(lotrInformation.quantity).toBe(6);
+
+      expect(kateBooking.isActive).toBeFalsy();
+    });
+  });
+
+  describe('Should throw errors when', () => {
+    describe('Book throwing error', () => {
+      it('Should throw error when creating book with empty title', () => {
+        expect(() => {
+          library.addBook(
+            {
+              title: '',
+              author: 'Test',
+              isbn: 'BC432',
+            },
+            5
+          );
+        }).toThrow();
+      });
+
+      it('Should throw error when creating book with empty author', () => {
+        expect(() => {
+          library.addBook(
+            {
+              title: 'Test',
+              author: '',
+              isbn: 'BC432',
+            },
+            5
+          );
+        }).toThrow();
+      });
+
+      it('Should throw error when creating book with empty isbn number', () => {
+        expect(() => {
+          library.addBook(
+            {
+              title: 'Test',
+              author: 'Test',
+              isbn: '',
+            },
+            5
+          );
+        }).toThrow();
+      });
+
+      it('Should throw error when creating book with quantity equal or bellow zero', () => {
+        expect(() => {
+          library.addBook(
+            {
+              title: 'Test',
+              author: 'Test',
+              isbn: '',
+            },
+            -5
+          );
+        }).toThrow();
+      });
+
+      it('Should throw error when trying delete deleted book', () => {
+        harryPotter.deletedAt = new Date();
+
+        expect(() => {
+          library.deleteBook(harryPotter.id);
+        }).toThrow();
+      });
+
+      it('Should throw error when updating book with empty author', () => {
+        expect(() => {
+          library.setBookAuthor(harryPotter.id, '');
+        }).toThrow();
+      });
+
+      it('Should throw error when updating book with empty title', () => {
+        expect(() => {
+          library.setBookTitle(harryPotter.id, '');
+        }).toThrow();
+      });
+
+      it('Should throw error when updating book with empty isbn number', () => {
+        expect(() => {
+          library.setBookIsbn(harryPotter.id, '');
+        }).toThrow();
+      });
+    });
+
+    describe('User throwing error', () => {
+      it('Should throw error when creating user with  empty email', () => {
+        expect(() => {
+          library.addUser('');
+        }).toThrow();
+      });
+
+      it('Should throw error when email is only whitespace string', () => {
+        expect(() => {
+          library.addUser('                 ');
+        }).toThrow();
+      });
+
+      it('Should throw error when email not include @', () => {
+        expect(() => {
+          library.addUser('user.com');
+        }).toThrow();
+      });
+
+      it('Should throw error when try to delete deleted user', () => {
+        library.deleteUser(john.id);
+
+        expect(() => {
+          library.deleteUser(john.id);
+        }).toThrow();
+      });
+
+      it('Should throw error when trying activate not blocked user', () => {
+        expect(() => {
+          library.activateUser(john.id);
+        });
+      });
+
+      it('Should throw error when user is not blocked', () => {
+        expect(() => {
+          library.blockUser(john.id);
+        });
+      });
+
+      it('Should throw error when user cannot be reactivated - is active', () => {
+        expect(() => {
+          library.activateUser(john.id);
+        });
+      });
     });
   });
 });

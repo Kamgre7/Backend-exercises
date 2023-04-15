@@ -152,13 +152,5 @@ describe('BookList', () => {
         bookList.findBookByIdOrThrow('1234');
       }).toThrow();
     });
-
-    /*  it('Should throw error when book is deleted', () => {
-      harryPotter.deletedAt = new Date();
-
-      expect(() => {
-        bookList.checkIfNotDeletedOrThrow(harryPotter);
-      }).toThrow();
-    }); */
   });
 });
