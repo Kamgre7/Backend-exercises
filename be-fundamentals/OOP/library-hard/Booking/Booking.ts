@@ -7,7 +7,7 @@ export type BookingDetails = {
 
 export type BookRentInformation = {
   isRented: boolean;
-  returnedAt: Date;
+  returnedAt: Date | null;
 };
 
 export interface IBooking {
@@ -32,7 +32,7 @@ export class Booking implements IBooking {
   >();
   isActive: boolean = true;
   createdAt: Date = new Date();
-  returnedAt: Date;
+  returnedAt: Date | null = null;
 
   constructor(bookingDetails: BookingDetails, public readonly id = uuid()) {
     const { userId, bookIds } = bookingDetails;

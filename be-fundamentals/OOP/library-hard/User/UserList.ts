@@ -8,7 +8,7 @@ export type UserInformation = {
 
 export interface IUserList {
   users: Map<string, UserInformation>;
-  addUser(email: string): string;
+  addUser(user: IUser): string;
   deleteUser(userId: string): void;
   findUserByIdOrThrow(userId: string): UserInformation;
   findUserByEmail(email: string): UserInformation | null;
@@ -28,11 +28,7 @@ export class UserList implements IUserList {
     return UserList.instance;
   }
 
-  addUser(email: string): string {
-    this.checkIfEmailAvailableOrThrow(email);
-
-    const user = new User(email);
-
+  addUser(user: IUser): string {
     this.users.set(user.id, {
       user,
       penaltyPoints: 0,
@@ -51,7 +47,7 @@ export class UserList implements IUserList {
   findUserByIdOrThrow(userId: string): UserInformation {
     const userInformation = this.users.get(userId);
 
-    if (userInformation === undefined || userInformation.user.deletedAt) {
+    if (!userInformation || userInformation.user.deletedAt) {
       throw new Error('User not found');
     }
 

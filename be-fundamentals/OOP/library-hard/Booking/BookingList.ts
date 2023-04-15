@@ -1,9 +1,9 @@
 import { bookingDB } from '../utils/libraryDB';
-import { Booking, BookingDetails, IBooking } from './Booking';
+import { Booking, IBooking } from './Booking';
 
 export interface IBookingList {
   bookings: Map<string, IBooking>;
-  addBooking(bookingDetails: BookingDetails): string;
+  addBooking(booking: IBooking): string;
   findBookingByIdOrThrow(bookingId: string): IBooking;
 }
 
@@ -20,12 +20,7 @@ export class BookingList implements IBookingList {
     return BookingList.instance;
   }
 
-  addBooking(bookingDetails: BookingDetails): string {
-    const booking = new Booking({
-      userId: bookingDetails.userId,
-      bookIds: bookingDetails.bookIds,
-    });
-
+  addBooking(booking: IBooking): string {
     this.bookings.set(booking.id, booking);
 
     return booking.id;
@@ -34,7 +29,7 @@ export class BookingList implements IBookingList {
   findBookingByIdOrThrow(bookingId: string): IBooking {
     const booking = this.bookings.get(bookingId);
 
-    if (booking === undefined) {
+    if (!booking) {
       throw new Error('Booking not found');
     }
 
