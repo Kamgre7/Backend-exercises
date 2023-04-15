@@ -50,7 +50,7 @@ describe('BookingHandler', () => {
 
     expect(bookBookingInfo.isRented).toBeTruthy();
 
-    bookingHandler.setBooksAreReturned(johnBooking, [harryPotter.id]);
+    bookingHandler.returnBooks(johnBooking, [harryPotter.id]);
 
     expect(bookBookingInfo.isRented).toBeFalsy();
   });
@@ -60,7 +60,7 @@ describe('BookingHandler', () => {
   });
 
   it('Should set booking isActive value - false ', () => {
-    bookingHandler.setBooksAreReturned(johnBooking, [
+    bookingHandler.returnBooks(johnBooking, [
       harryPotter.id,
       lordOfTheRings.id,
     ]);
@@ -89,7 +89,7 @@ describe('BookingHandler', () => {
     });
 
     it('Should throw error when booking is not active', () => {
-      bookingHandler.setBooksAreReturned(johnBooking, [
+      bookingHandler.returnBooks(johnBooking, [
         harryPotter.id,
         lordOfTheRings.id,
       ]);
@@ -111,10 +111,10 @@ describe('BookingHandler', () => {
     });
 
     it('Should throw error when trying to return returned book', () => {
-      bookingHandler.setBooksAreReturned(johnBooking, [harryPotter.id]);
+      bookingHandler.returnBooks(johnBooking, [harryPotter.id]);
 
       expect(() => {
-        bookingHandler.setBooksAreReturned(johnBooking, [harryPotter.id]);
+        bookingHandler.returnBooks(johnBooking, [harryPotter.id]);
       }).toThrow();
     });
   });

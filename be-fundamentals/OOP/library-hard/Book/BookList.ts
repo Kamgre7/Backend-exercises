@@ -67,7 +67,7 @@ export class BookList implements IBookList {
   findBookByIdOrThrow(bookId: string): BookInformation {
     const bookInformation = this.books.get(bookId);
 
-    if (bookInformation === undefined || bookInformation.book.deletedAt) {
+    if (!bookInformation || bookInformation.book.deletedAt) {
       throw new Error('Book not found');
     }
 

@@ -18,7 +18,7 @@ export interface IBooking {
   createdAt: Date;
   returnedAt: Date | null;
   setIsNotActive(): void;
-  setBooksAreReturned(bookIds: string[]): void;
+  returnBooks(bookIds: string[]): void;
   checkIfAllBooksReturned(): boolean;
   getBookingDate(): Date;
   getReturnDate(): Date;
@@ -60,7 +60,7 @@ export class Booking implements IBooking {
     return this.returnedAt;
   }
 
-  setBooksAreReturned(bookIds: string[]): void {
+  returnBooks(bookIds: string[]): void {
     bookIds.forEach((id) => {
       const book = this.books.get(id);
 

@@ -3,10 +3,10 @@ import { IBooking } from './Booking';
 export interface IBookingHandler {
   setIsNotActive(booking: IBooking): void;
   setReturnDate(booking: IBooking): void;
-  setBooksAreReturned(booking: IBooking, bookIds: string[]): void;
+  returnBooks(booking: IBooking, bookIds: string[]): void;
   checkIfAllBooksReturned(booking: IBooking): boolean;
   checkIfBookingActiveOrThrow(booking: IBooking): void;
-  verifyTheBooksToBeReturned(booking: IBooking, bookIds: string[]): void;
+  verifyBooksToBeReturned(booking: IBooking, bookIds: string[]): void;
   checkIfBookingIncludeBooks(booking: IBooking, bookIds: string[]): void;
   checkIfBooksAreActive(booking: IBooking, bookIds: string[]): void;
 }
@@ -20,9 +20,9 @@ export class BookingHandler implements IBookingHandler {
     booking.returnedAt = new Date();
   }
 
-  setBooksAreReturned(booking: IBooking, bookIds: string[]): void {
+  returnBooks(booking: IBooking, bookIds: string[]): void {
     this.checkIfBooksAreActive(booking, bookIds);
-    booking.setBooksAreReturned(bookIds);
+    booking.returnBooks(bookIds);
   }
 
   checkIfAllBooksReturned(booking: IBooking): boolean {
@@ -35,7 +35,7 @@ export class BookingHandler implements IBookingHandler {
     }
   }
 
-  verifyTheBooksToBeReturned(booking: IBooking, bookIds: string[]): void {
+  verifyBooksToBeReturned(booking: IBooking, bookIds: string[]): void {
     this.checkIfBookingIncludeBooks(booking, bookIds);
     this.checkIfBooksAreActive(booking, bookIds);
   }

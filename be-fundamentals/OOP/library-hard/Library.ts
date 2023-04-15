@@ -32,9 +32,9 @@ export class Library implements ILibrary {
     private readonly userHandler: IUserHandler,
     private readonly bookingHandler: IBookingHandler,
 
-    private bookList: IBookList,
-    private userList: IUserList,
-    private bookingList: IBookingList
+    private readonly bookList: IBookList,
+    private readonly userList: IUserList,
+    private readonly bookingList: IBookingList
   ) {}
 
   static getInstance(
@@ -62,7 +62,7 @@ export class Library implements ILibrary {
   addBook(bookDetails: BookDetails, quantity: number): string {
     const bookInformation = this.bookList.findBookByIsbn(bookDetails.isbn);
 
-    if (bookInformation !== null) {
+    if (bookInformation) {
       this.bookHandler.setQuantity(bookInformation, quantity);
 
       return bookInformation.book.id;
@@ -96,7 +96,7 @@ export class Library implements ILibrary {
   addUser(email: string): string {
     const userInformation = this.userList.findUserByEmail(email);
 
-    if (userInformation !== null) {
+    if (userInformation) {
       this.tryToActivateUserAccount(userInformation.user);
 
       return userInformation.user.id;
@@ -131,7 +131,6 @@ export class Library implements ILibrary {
   rentBook(userId: string, bookIds: string[]): string {
     const userInformation = this.userList.findUserByIdOrThrow(userId);
 
-    this.userHandler.checkIfUserNotDeletedOrThrow(userInformation);
     this.ifUserBlockedTryActivate(userInformation);
 
     const availableBookIds = this.bookList.findAvailableBooksById(bookIds);
@@ -153,9 +152,9 @@ export class Library implements ILibrary {
 
     const userInformation = this.userList.findUserByIdOrThrow(booking.userId);
 
-    this.bookingHandler.verifyTheBooksToBeReturned(booking, bookIds);
+    this.bookingHandler.verifyBooksToBeReturned(booking, bookIds);
 
-    this.bookingHandler.setBooksAreReturned(booking, bookIds);
+    this.bookingHandler.returnBooks(booking, bookIds);
 
     this.changeBookQuantity(bookIds, 1);
 

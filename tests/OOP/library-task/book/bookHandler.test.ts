@@ -46,7 +46,9 @@ describe('BookHandler', () => {
     expect(harryPotter.isbn).toBe('QWE123');
   });
 
-  it('Should update book quantity from 10 to 15', () => {
+  it('Should update book quantity by given number', () => {
+    hpInformation.quantity = 10;
+
     bookHandler.setQuantity(hpInformation, 5);
 
     expect(hpInformation.quantity).toEqual(15);
@@ -78,6 +80,8 @@ describe('BookHandler', () => {
     });
 
     it('Should throw error when updating book quantity and quantity is below or equal zero', () => {
+      hpInformation.quantity = 10;
+
       expect(() => {
         bookHandler.setQuantity(hpInformation, -100);
       }).toThrow();

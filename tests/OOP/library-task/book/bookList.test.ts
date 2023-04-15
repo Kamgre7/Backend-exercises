@@ -89,7 +89,7 @@ describe('BookList', () => {
     expect(bookInformation).toStrictEqual(hpInformation);
   });
 
-  it('Should return array of available books ID - book quantity > 1, book not deleted and book ID exist', () => {
+  it('Should return array of available book IDs, when book quantity > 1, book not deleted and book exists', () => {
     const booksId = [harryPotter.id, lordOfTheRings.id, '1234', '4321'];
 
     expect(bookList.findAvailableBooksById(booksId)).toStrictEqual([

@@ -42,7 +42,7 @@ describe('Booking', () => {
   });
 
   it('Should set book is returned', () => {
-    booking.setBooksAreReturned([hpBook.id]);
+    booking.returnBooks([hpBook.id]);
     const hpBookBookingInfo = booking.books.get(hpBook.id);
     const witherBookBookingInfo = booking.books.get(witcherBook.id);
 
@@ -55,7 +55,7 @@ describe('Booking', () => {
   });
 
   it('Should set booking isActive value - false ', () => {
-    booking.setBooksAreReturned([hpBook.id, witcherBook.id]);
+    booking.returnBooks([hpBook.id, witcherBook.id]);
     booking.setIsNotActive();
 
     expect(booking.isActive).toBeFalsy();

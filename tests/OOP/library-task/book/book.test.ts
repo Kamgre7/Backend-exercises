@@ -1,16 +1,16 @@
 import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 
-let book: Book;
-
-beforeEach(() => {
-  book = new Book({
-    title: 'Harry Potter',
-    author: 'J.K Rowling',
-    isbn: '1234',
-  });
-});
-
 describe('Book', () => {
+  let book: Book;
+
+  beforeEach(() => {
+    book = new Book({
+      title: 'Harry Potter',
+      author: 'J.K Rowling',
+      isbn: '1234',
+    });
+  });
+
   it('Should be instance of Book class', () => {
     expect(book).toBeInstanceOf(Book);
   });
