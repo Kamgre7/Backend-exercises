@@ -1,12 +1,12 @@
 import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
 
-let user: User;
-
-beforeEach(() => {
-  user = new User('user@email.com');
-});
-
 describe('User', () => {
+  let user: User;
+
+  beforeEach(() => {
+    user = new User('user@email.com');
+  });
+
   it('Should be an instance of User class', () => {
     expect(user).toBeInstanceOf(User);
   });
@@ -15,6 +15,14 @@ describe('User', () => {
     user.setEmail('newEmail@example.com');
 
     expect(user.email).toBe('newEmail@example.com');
+  });
+
+  it('Should have default value of deletedAt - null', () => {
+    expect(user.deletedAt).toBeNull();
+  });
+
+  it('Should have default value of blockedAt - null', () => {
+    expect(user.blockedAt).toBeNull();
   });
 
   describe('Should throw an error when', () => {

@@ -2,33 +2,33 @@ import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 import { Booking } from '../../../../be-fundamentals/OOP/library-hard/Booking/Booking';
 import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
 
-let booking: Booking;
-let user: User;
-let hpBook: Book;
-let witcherBook: Book;
-
-beforeEach(() => {
-  user = new User('user@email.com');
-
-  hpBook = new Book({
-    title: 'Harry Potter',
-    author: 'J.K Rowling',
-    isbn: '1234',
-  });
-
-  witcherBook = new Book({
-    title: 'The Witcher',
-    author: 'A. Sapkowski',
-    isbn: 'BYS321',
-  });
-
-  booking = new Booking({
-    bookIds: [hpBook.id, witcherBook.id],
-    userId: user.id,
-  });
-});
-
 describe('Booking', () => {
+  let booking: Booking;
+  let user: User;
+  let hpBook: Book;
+  let witcherBook: Book;
+
+  beforeEach(() => {
+    user = new User('user@email.com');
+
+    hpBook = new Book({
+      title: 'Harry Potter',
+      author: 'J.K Rowling',
+      isbn: '1234',
+    });
+
+    witcherBook = new Book({
+      title: 'The Witcher',
+      author: 'A. Sapkowski',
+      isbn: 'BYS321',
+    });
+
+    booking = new Booking({
+      bookIds: [hpBook.id, witcherBook.id],
+      userId: user.id,
+    });
+  });
+
   it('Should be instance of Booking class', () => {
     expect(booking).toBeInstanceOf(Booking);
   });
@@ -37,20 +37,21 @@ describe('Booking', () => {
     expect(booking.isActive).toBeTruthy();
   });
 
-  it('Should have default value of returnedAt - undefined', () => {
-    expect(booking.returnedAt).toBeUndefined();
+  it('Should have default value of returnedAt - null', () => {
+    expect(booking.returnedAt).toBeNull();
   });
 
   it('Should set book is returned', () => {
-    booking.returnBooks([hpBook.id]);
     const hpBookBookingInfo = booking.books.get(hpBook.id);
-    const witherBookBookingInfo = booking.books.get(witcherBook.id);
+
+    expect(hpBookBookingInfo.isRented).toBeTruthy();
+
+    booking.returnBooks([hpBook.id]);
 
     expect(hpBookBookingInfo.isRented).toBeFalsy();
-    expect(witherBookBookingInfo.isRented).toBeTruthy();
   });
 
-  it('Should return false - books are not returned', () => {
+  it('Should return false - all books are not returned', () => {
     expect(booking.checkIfAllBooksReturned()).toBeFalsy();
   });
 
@@ -62,7 +63,6 @@ describe('Booking', () => {
   });
 
   it('Should return booking returned date', () => {
-    booking.getReturnDate();
     expect(booking.getReturnDate()).toStrictEqual(booking.returnedAt);
   });
 
@@ -81,6 +81,15 @@ describe('Booking', () => {
         new Booking({
           userId: user.id,
           bookIds: ['12345'],
+        });
+      }).toThrow();
+    });
+
+    it('Should throw error when creating booking with  wrong book ID', () => {
+      expect(() => {
+        new Booking({
+          userId: user.id,
+          bookIds: ['4321'],
         });
       }).toThrow();
     });

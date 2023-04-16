@@ -13,6 +13,8 @@ export interface IBookingHandler {
 
 export class BookingHandler implements IBookingHandler {
   setIsNotActive(booking: IBooking): void {
+    this.checkIfBookingActiveOrThrow(booking);
+
     booking.setIsNotActive();
   }
 

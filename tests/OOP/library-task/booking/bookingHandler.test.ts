@@ -6,41 +6,41 @@ import {
 import { BookingHandler } from '../../../../be-fundamentals/OOP/library-hard/Booking/BookingHandler';
 import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
 
-let harryPotter: Book;
-let lordOfTheRings: Book;
-let john: User;
-let bookingHandler: BookingHandler;
-let johnBookingDetails: BookingDetails;
-let johnBooking: Booking;
-
-beforeAll(() => {
-  bookingHandler = new BookingHandler();
-});
-
-beforeEach(() => {
-  john = new User('john@example.com');
-
-  harryPotter = new Book({
-    title: 'Harry Potter',
-    author: 'J.K Rowling',
-    isbn: '1234',
-  });
-
-  lordOfTheRings = new Book({
-    title: 'Lord Of The Rings',
-    author: 'J.R.R Tolkien',
-    isbn: '4321',
-  });
-
-  johnBookingDetails = {
-    bookIds: [harryPotter.id, lordOfTheRings.id],
-    userId: john.id,
-  };
-
-  johnBooking = new Booking(johnBookingDetails);
-});
-
 describe('BookingHandler', () => {
+  let harryPotter: Book;
+  let lordOfTheRings: Book;
+  let john: User;
+  let bookingHandler: BookingHandler;
+  let johnBookingDetails: BookingDetails;
+  let johnBooking: Booking;
+
+  beforeAll(() => {
+    bookingHandler = new BookingHandler();
+  });
+
+  beforeEach(() => {
+    john = new User('john@example.com');
+
+    harryPotter = new Book({
+      title: 'Harry Potter',
+      author: 'J.K Rowling',
+      isbn: '1234',
+    });
+
+    lordOfTheRings = new Book({
+      title: 'Lord Of The Rings',
+      author: 'J.R.R Tolkien',
+      isbn: '4321',
+    });
+
+    johnBookingDetails = {
+      bookIds: [harryPotter.id, lordOfTheRings.id],
+      userId: john.id,
+    };
+
+    johnBooking = new Booking(johnBookingDetails);
+  });
+
   it('Should be a instance of BookingHandler', () => {
     expect(bookingHandler).toBeInstanceOf(BookingHandler);
   });
@@ -70,12 +70,6 @@ describe('BookingHandler', () => {
     expect(johnBooking.isActive).toBeFalsy();
   });
 
-  it('Should set returnedAt date - 2022/05/28', () => {
-    johnBooking.createdAt = new Date('2022/05/20');
-    johnBooking.returnedAt = new Date('2022/05/28');
-    expect(johnBooking.returnedAt).toStrictEqual(new Date('2022/05/28'));
-  });
-
   it('Should return booking returned date', () => {
     johnBooking.getReturnDate();
     expect(johnBooking.getReturnDate()).toStrictEqual(johnBooking.returnedAt);
@@ -88,7 +82,7 @@ describe('BookingHandler', () => {
       }).toThrow();
     });
 
-    it('Should throw error when booking is not active', () => {
+    it('Should throw error when trying to change the status to inactive when is already inactive', () => {
       bookingHandler.returnBooks(johnBooking, [
         harryPotter.id,
         lordOfTheRings.id,
@@ -97,7 +91,7 @@ describe('BookingHandler', () => {
       bookingHandler.setIsNotActive(johnBooking);
 
       expect(() => {
-        bookingHandler.checkIfBookingActiveOrThrow(johnBooking);
+        bookingHandler.setIsNotActive(johnBooking);
       }).toThrow();
     });
 

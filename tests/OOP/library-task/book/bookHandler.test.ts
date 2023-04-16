@@ -2,28 +2,28 @@ import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 import { BookHandler } from '../../../../be-fundamentals/OOP/library-hard/Book/BookHandler';
 import { BookInformation } from '../../../../be-fundamentals/OOP/library-hard/Book/BookList';
 
-let bookHandler: BookHandler;
-let harryPotter: Book;
-let hpInformation: BookInformation;
+describe('BookHandler', () => {
+  let bookHandler: BookHandler;
+  let harryPotter: Book;
+  let hpInformation: BookInformation;
 
-beforeAll(() => {
-  bookHandler = new BookHandler();
-});
-
-beforeEach(() => {
-  harryPotter = new Book({
-    title: 'Harry Potter',
-    author: 'J.K Rowling',
-    isbn: '1234',
+  beforeAll(() => {
+    bookHandler = new BookHandler();
   });
 
-  hpInformation = {
-    book: harryPotter,
-    quantity: 10,
-  };
-});
+  beforeEach(() => {
+    harryPotter = new Book({
+      title: 'Harry Potter',
+      author: 'J.K Rowling',
+      isbn: '1234',
+    });
 
-describe('BookHandler', () => {
+    hpInformation = {
+      book: harryPotter,
+      quantity: 10,
+    };
+  });
+
   it('Should be a instance of BookHandler', () => {
     expect(bookHandler).toBeInstanceOf(BookHandler);
   });

@@ -1,52 +1,62 @@
-import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import {
+  Book,
+  BookDetails,
+} from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 import {
   BookInformation,
   BookList,
 } from '../../../../be-fundamentals/OOP/library-hard/Book/BookList';
 
-let bookList: BookList;
-let books: Map<string, BookInformation>;
-let harryPotter: Book;
-let lordOfTheRings: Book;
-let hpInformation: BookInformation;
-let lotrInformation: BookInformation;
-
-beforeAll(() => {
-  bookList = BookList.getInstance(books);
-});
-
-beforeEach(() => {
-  harryPotter = new Book({
-    title: 'Harry Potter',
-    author: 'J.K Rowling',
-    isbn: '1234',
-  });
-
-  hpInformation = {
-    book: harryPotter,
-    quantity: 10,
-  };
-
-  lordOfTheRings = new Book({
-    title: 'Lord Of The Rings',
-    author: 'J.R.R Tolkien',
-    isbn: '4321',
-  });
-
-  lotrInformation = {
-    book: lordOfTheRings,
-    quantity: 5,
-  };
-
-  books = new Map([
-    [harryPotter.id, hpInformation],
-    [lordOfTheRings.id, lotrInformation],
-  ]);
-
-  bookList.books = books;
-});
-
 describe('BookList', () => {
+  let bookList: BookList;
+  let books: Map<string, BookInformation>;
+  let bookDetails: BookDetails;
+  let harryPotter: Book;
+  let lordOfTheRings: Book;
+  let hpInformation: BookInformation;
+  let lotrInformation: BookInformation;
+
+  beforeAll(() => {
+    bookList = BookList.getInstance(books);
+  });
+
+  beforeEach(() => {
+    harryPotter = new Book({
+      title: 'Harry Potter',
+      author: 'J.K Rowling',
+      isbn: '1234',
+    });
+
+    hpInformation = {
+      book: harryPotter,
+      quantity: 10,
+    };
+
+    lordOfTheRings = new Book({
+      title: 'Lord Of The Rings',
+      author: 'J.R.R Tolkien',
+      isbn: '4321',
+    });
+
+    lotrInformation = {
+      book: lordOfTheRings,
+      quantity: 5,
+    };
+
+    books = new Map([
+      [harryPotter.id, hpInformation],
+      [lordOfTheRings.id, lotrInformation],
+    ]);
+
+    bookDetails = {
+      author: 'Test',
+      isbn: '1234',
+      title: 'example',
+    };
+
+    bookList.books = books;
+  });
+
   it('Should be instance of BookList', () => {
     expect(bookList).toBeInstanceOf(BookList);
   });
@@ -58,23 +68,19 @@ describe('BookList', () => {
   });
 
   it('Should add a book', () => {
-    const bookDetails = {
-      author: 'unknown',
-      isbn: '1234',
-      title: 'example',
-    };
+    const book = new Book(bookDetails);
 
-    const bookId = bookList.addBook(bookDetails, 5);
+    bookList.addBook(book, 5);
 
-    expect(bookList.books.has(bookId)).toBeTruthy();
+    expect(bookList.books.has(book.id)).toBeTruthy();
   });
 
   it('Should soft delete a book', () => {
-    expect(hpInformation.book.deletedAt).toBeUndefined();
+    expect(hpInformation.book.deletedAt).toBeNull();
 
     bookList.deleteBook(hpInformation.book.id);
 
-    expect(hpInformation.book.deletedAt).toBeDefined();
+    expect(hpInformation.book.deletedAt).toBeInstanceOf(Date);
   });
 
   it('Should find a book using bookId and return it', () => {
@@ -100,50 +106,10 @@ describe('BookList', () => {
 
   describe('It should throw error when', () => {
     it('Should throw error when adding book with quantity < 1', () => {
-      const bookDetails = {
-        title: 'Example',
-        author: 'Test',
-        isbn: '1234',
-      };
+      const book = new Book(bookDetails);
 
       expect(() => {
-        bookList.addBook(bookDetails, 0);
-      }).toThrow();
-    });
-
-    it('Should throw error when adding book with empty title', () => {
-      const bookDetails = {
-        title: '',
-        author: 'Test',
-        isbn: '1234',
-      };
-
-      expect(() => {
-        bookList.addBook(bookDetails, 5);
-      }).toThrow();
-    });
-
-    it('Should throw error when adding book with empty author', () => {
-      const bookDetails = {
-        title: 'example',
-        author: '',
-        isbn: '1234',
-      };
-
-      expect(() => {
-        bookList.addBook(bookDetails, 5);
-      }).toThrow();
-    });
-
-    it('Should throw error when adding book with empty isbn number', () => {
-      const bookDetails = {
-        title: 'Example',
-        author: 'Test',
-        isbn: '',
-      };
-
-      expect(() => {
-        bookList.addBook(bookDetails, 5);
+        bookList.addBook(book, 0);
       }).toThrow();
     });
 

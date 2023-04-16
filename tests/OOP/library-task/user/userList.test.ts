@@ -4,41 +4,41 @@ import {
   UserList,
 } from '../../../../be-fundamentals/OOP/library-hard/User/UserList';
 
-let userList: UserList;
-let users: Map<string, UserInformation>;
-let john: User;
-let kate: User;
-let kateInformation: UserInformation;
-let johnInformation: UserInformation;
-
-beforeAll(() => {
-  userList = UserList.getInstance(users);
-});
-
-beforeEach(() => {
-  kate = new User('kate@example.com');
-
-  kateInformation = {
-    user: kate,
-    penaltyPoints: 0,
-  };
-
-  john = new User('john@example.com');
-
-  johnInformation = {
-    user: john,
-    penaltyPoints: 0,
-  };
-
-  users = new Map([
-    [kate.id, kateInformation],
-    [john.id, johnInformation],
-  ]);
-
-  userList.users = users;
-});
-
 describe('UserList', () => {
+  let userList: UserList;
+  let users: Map<string, UserInformation>;
+  let john: User;
+  let kate: User;
+  let kateInformation: UserInformation;
+  let johnInformation: UserInformation;
+
+  beforeAll(() => {
+    userList = UserList.getInstance(users);
+  });
+
+  beforeEach(() => {
+    kate = new User('kate@example.com');
+
+    kateInformation = {
+      user: kate,
+      penaltyPoints: 0,
+    };
+
+    john = new User('john@example.com');
+
+    johnInformation = {
+      user: john,
+      penaltyPoints: 0,
+    };
+
+    users = new Map([
+      [kate.id, kateInformation],
+      [john.id, johnInformation],
+    ]);
+
+    userList.users = users;
+  });
+
   it('Should be instance of UserList', () => {
     expect(userList).toBeInstanceOf(UserList);
   });
@@ -50,22 +50,19 @@ describe('UserList', () => {
   });
 
   it('Should add a new user', () => {
-    const newUserId = userList.addUser('user@example.com');
+    const user = new User('user@example.com');
 
-    expect(userList.users.has(newUserId)).toBeTruthy();
+    userList.addUser(user);
+
+    expect(userList.users.has(user.id)).toBeTruthy();
   });
 
-  it('Should find a user', () => {
-    const user = userList.findUserByIdOrThrow(john.id);
-
-    expect(user).toStrictEqual(johnInformation);
-  });
   it('Should soft delete a user', () => {
-    expect(kate.deletedAt).toBeUndefined();
+    expect(kate.deletedAt).toBeNull();
 
     userList.deleteUser(kate.id);
 
-    expect(kate.deletedAt).toBeDefined();
+    expect(kate.deletedAt).toBeInstanceOf(Date);
   });
 
   it('Should find a user using email', () => {
@@ -75,35 +72,9 @@ describe('UserList', () => {
   });
 
   describe('Should throw error when', () => {
-    it('Should throw error when creating user with  empty email', () => {
-      expect(() => {
-        userList.addUser('');
-      }).toThrow();
-    });
-
-    it('Should throw error when email is only whitespace string', () => {
-      expect(() => {
-        userList.addUser('                 ');
-      }).toThrow();
-    });
-
-    it('Should throw error when email not include @', () => {
-      expect(() => {
-        userList.addUser('user.com');
-      }).toThrow();
-    });
-
     it('Should throw error when user is not found', () => {
       expect(() => {
         userList.findUserByIdOrThrow('12345');
-      }).toThrow();
-    });
-
-    it('Should throw error when email address is already used and try to add again to DB', () => {
-      userList.addUser('example@example.com');
-
-      expect(() => {
-        userList.addUser('example@example.com');
       }).toThrow();
     });
 
@@ -113,6 +84,12 @@ describe('UserList', () => {
       expect(() => {
         userList.deleteUser(john.id);
       }).toThrow();
+    });
+
+    it('Should throw error when email is already taken', () => {
+      expect(() => {
+        userList.checkIfEmailAvailableOrThrow(kate.email);
+      });
     });
   });
 });

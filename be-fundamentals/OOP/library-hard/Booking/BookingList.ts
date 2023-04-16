@@ -1,5 +1,5 @@
 import { bookingDB } from '../utils/libraryDB';
-import { Booking, IBooking } from './Booking';
+import { IBooking } from './Booking';
 
 export interface IBookingList {
   bookings: Map<string, IBooking>;
