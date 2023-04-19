@@ -1,6 +1,7 @@
 import {
   Book,
   BookDetails,
+  IBook,
 } from '../../../be-fundamentals/OOP/library-hard/Book/Book';
 import {
   Booking,
@@ -10,35 +11,50 @@ import {
 import {
   BookInformation,
   BookList,
+  IBookList,
 } from '../../../be-fundamentals/OOP/library-hard/Book/BookList';
 import { Library } from '../../../be-fundamentals/OOP/library-hard/Library';
-import { User } from '../../../be-fundamentals/OOP/library-hard/User/User';
 import {
+  IUser,
+  User,
+} from '../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  IUserList,
   UserInformation,
   UserList,
 } from '../../../be-fundamentals/OOP/library-hard/User/UserList';
-import { BookingList } from '../../../be-fundamentals/OOP/library-hard/Booking/BookingList';
+import {
+  BookingList,
+  IBookingList,
+} from '../../../be-fundamentals/OOP/library-hard/Booking/BookingList';
 import { BookHandler } from '../../../be-fundamentals/OOP/library-hard/Book/BookHandler';
 import { UserHandler } from '../../../be-fundamentals/OOP/library-hard/User/UserHandler';
 import { BookingHandler } from '../../../be-fundamentals/OOP/library-hard/Booking/BookingHandler';
+import {
+  bookData,
+  hpBookDetails,
+  johnUserEmail,
+  kateUserEmail,
+  lotrBookDetails,
+} from './utils/constants';
 
 describe('Library', () => {
-  let john: User;
-  let kate: User;
-  let userList: UserList;
+  let john: IUser;
+  let kate: IUser;
+  let userList: IUserList;
   let users: Map<string, UserInformation>;
   let kateInformation: UserInformation;
   let johnInformation: UserInformation;
 
   let bookDetails: BookDetails;
-  let harryPotter: Book;
-  let lordOfTheRings: Book;
-  let bookList: BookList;
+  let harryPotter: IBook;
+  let lordOfTheRings: IBook;
+  let bookList: IBookList;
   let books: Map<string, BookInformation>;
   let hpInformation: BookInformation;
   let lotrInformation: BookInformation;
 
-  let bookingList: BookingList;
+  let bookingList: IBookingList;
   let bookings: Map<string, IBooking>;
   let kateBookingDetails: BookingDetails;
   let johnBookingDetails: BookingDetails;
@@ -63,14 +79,14 @@ describe('Library', () => {
   });
 
   beforeEach(() => {
-    kate = new User('kate@example.com');
+    kate = new User(kateUserEmail);
 
     kateInformation = {
       user: kate,
       penaltyPoints: 0,
     };
 
-    john = new User('john@example.com');
+    john = new User(johnUserEmail);
 
     johnInformation = {
       user: john,
@@ -82,28 +98,16 @@ describe('Library', () => {
       [john.id, johnInformation],
     ]);
 
-    bookDetails = {
-      author: 'unknown',
-      title: 'Train',
-      isbn: 'ABV1',
-    };
+    bookDetails = { ...bookData };
 
-    harryPotter = new Book({
-      title: 'Harry Potter',
-      author: 'J.K Rowling',
-      isbn: '1234',
-    });
+    harryPotter = new Book({ ...hpBookDetails });
 
     hpInformation = {
       book: harryPotter,
       quantity: 10,
     };
 
-    lordOfTheRings = new Book({
-      title: 'Lord Of The Rings',
-      author: 'J.R.R Tolkien',
-      isbn: '4321',
-    });
+    lordOfTheRings = new Book({ ...lotrBookDetails });
 
     lotrInformation = {
       book: lordOfTheRings,
@@ -185,9 +189,9 @@ describe('Library', () => {
     });
 
     it('Should set a book title', () => {
-      library.setBookTitle(harryPotter.id, 'The wither');
+      library.setBookTitle(harryPotter.id, 'The witcher');
 
-      expect(harryPotter.title).toBe('The wither');
+      expect(harryPotter.title).toBe('The witcher');
     });
 
     it('Should set a book isbn number', () => {
@@ -213,14 +217,11 @@ describe('Library', () => {
     });
 
     it('Should reactive soft deleted user if user want register again this same email', () => {
-      const userId = library.addUser('reactive@example.com');
-      const userInformation = userList.users.get(userId);
+      john.deletedAt = new Date();
 
-      library.deleteUser(userId);
-      expect(userInformation.user.deletedAt).toBeInstanceOf(Date);
+      library.addUser(johnUserEmail);
 
-      library.addUser('reactive@example.com');
-      expect(userInformation.user.deletedAt).toBeNull();
+      expect(john.deletedAt).toBeNull();
     });
 
     it('Should set a user email', () => {
@@ -238,7 +239,6 @@ describe('Library', () => {
     });
 
     it('Should activate blocked user', () => {
-      library.blockUser(john.id);
       johnInformation.user.blockedAt = new Date('2022-02-02');
 
       expect(johnInformation.user.blockedAt).toBeInstanceOf(Date);
