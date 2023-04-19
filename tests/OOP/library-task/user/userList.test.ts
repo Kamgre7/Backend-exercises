@@ -1,14 +1,19 @@
-import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
 import {
+  IUser,
+  User,
+} from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  IUserList,
   UserInformation,
   UserList,
 } from '../../../../be-fundamentals/OOP/library-hard/User/UserList';
+import { johnUserEmail, kateUserEmail } from '../utils/constants';
 
 describe('UserList', () => {
-  let userList: UserList;
+  let userList: IUserList;
   let users: Map<string, UserInformation>;
-  let john: User;
-  let kate: User;
+  let john: IUser;
+  let kate: IUser;
   let kateInformation: UserInformation;
   let johnInformation: UserInformation;
 
@@ -17,14 +22,14 @@ describe('UserList', () => {
   });
 
   beforeEach(() => {
-    kate = new User('kate@example.com');
+    kate = new User(kateUserEmail);
 
     kateInformation = {
       user: kate,
       penaltyPoints: 0,
     };
 
-    john = new User('john@example.com');
+    john = new User(johnUserEmail);
 
     johnInformation = {
       user: john,

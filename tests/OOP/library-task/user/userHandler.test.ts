@@ -1,12 +1,24 @@
-import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
-import { UserHandler } from '../../../../be-fundamentals/OOP/library-hard/User/UserHandler';
+import {
+  IUser,
+  User,
+} from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  IUserHandler,
+  UserHandler,
+} from '../../../../be-fundamentals/OOP/library-hard/User/UserHandler';
 import { UserInformation } from '../../../../be-fundamentals/OOP/library-hard/User/UserList';
+import { ALLOWED_BOOKING_TIME } from '../../../../be-fundamentals/OOP/library-hard/utils/utils';
+import {
+  blockedUserEmail,
+  johnUserEmail,
+  kateUserEmail,
+} from '../utils/constants';
 
 describe('UserHandler', () => {
-  let userHandler: UserHandler;
-  let john: User;
-  let kate: User;
-  let blockedUser: User;
+  let userHandler: IUserHandler;
+  let john: IUser;
+  let kate: IUser;
+  let blockedUser: IUser;
   let kateInformation: UserInformation;
   let johnInformation: UserInformation;
   let blockedUserInformation: UserInformation;
@@ -16,22 +28,21 @@ describe('UserHandler', () => {
   });
 
   beforeEach(() => {
-    kate = new User('kate@example.com');
+    kate = new User(kateUserEmail);
 
     kateInformation = {
       user: kate,
       penaltyPoints: 0,
     };
 
-    john = new User('john@example.com');
+    john = new User(johnUserEmail);
 
     johnInformation = {
       user: john,
       penaltyPoints: 0,
     };
 
-    blockedUser = new User('blocked@example.com');
-
+    blockedUser = new User(blockedUserEmail);
     blockedUser.blockedAt = new Date('10/10/2022');
 
     blockedUserInformation = {
@@ -74,20 +85,26 @@ describe('UserHandler', () => {
     expect(blockedUserInformation.user.blockedAt).toBeNull();
   });
 
-  it('Should add penalty points to user', () => {
-    kateInformation.penaltyPoints = 0;
-
+  it('Should calculate penalty points', () => {
     const daysPassedAfterBooking = 12;
     const bookingDate = new Date();
 
     bookingDate.setDate(bookingDate.getDate() - daysPassedAfterBooking);
 
-    const pointsToAdd = userHandler.calculatePenaltyPoints(bookingDate);
-    const sumPoints = kateInformation.penaltyPoints + pointsToAdd;
+    const penaltyPoints = userHandler.calculatePenaltyPoints(bookingDate);
 
-    userHandler.setUserPenaltyPoints(kateInformation, pointsToAdd);
+    expect(penaltyPoints).toEqual(
+      daysPassedAfterBooking - ALLOWED_BOOKING_TIME
+    );
+  });
 
-    expect(kateInformation.penaltyPoints).toEqual(sumPoints);
+  it('Should add penalty points to user', () => {
+    kateInformation.penaltyPoints = 0;
+    const penaltyPoints = 5;
+
+    userHandler.setUserPenaltyPoints(kateInformation, penaltyPoints);
+
+    expect(kateInformation.penaltyPoints).toEqual(5);
   });
 
   describe('It should throw error when', () => {

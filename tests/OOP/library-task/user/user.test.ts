@@ -1,7 +1,10 @@
-import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  IUser,
+  User,
+} from '../../../../be-fundamentals/OOP/library-hard/User/User';
 
 describe('User', () => {
-  let user: User;
+  let user: IUser;
 
   beforeEach(() => {
     user = new User('user@email.com');
