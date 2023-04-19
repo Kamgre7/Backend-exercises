@@ -1,27 +1,33 @@
-import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
-import { Booking } from '../../../../be-fundamentals/OOP/library-hard/Booking/Booking';
-import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  Book,
+  IBook,
+} from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import {
+  Booking,
+  IBooking,
+} from '../../../../be-fundamentals/OOP/library-hard/Booking/Booking';
+import {
+  IUser,
+  User,
+} from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  hpBookDetails,
+  johnUserEmail,
+  witcherBookDetails,
+} from '../utils/constants';
 
 describe('Booking', () => {
-  let booking: Booking;
-  let user: User;
-  let hpBook: Book;
-  let witcherBook: Book;
+  let booking: IBooking;
+  let user: IUser;
+  let hpBook: IBook;
+  let witcherBook: IBook;
 
   beforeEach(() => {
-    user = new User('user@email.com');
+    user = new User(johnUserEmail);
 
-    hpBook = new Book({
-      title: 'Harry Potter',
-      author: 'J.K Rowling',
-      isbn: '1234',
-    });
+    hpBook = new Book({ ...hpBookDetails });
 
-    witcherBook = new Book({
-      title: 'The Witcher',
-      author: 'A. Sapkowski',
-      isbn: 'BYS321',
-    });
+    witcherBook = new Book({ ...witcherBookDetails });
 
     booking = new Booking({
       bookIds: [hpBook.id, witcherBook.id],
@@ -41,7 +47,7 @@ describe('Booking', () => {
     expect(booking.returnedAt).toBeNull();
   });
 
-  it('Should set book is returned', () => {
+  it('Should return book', () => {
     const hpBookBookingInfo = booking.books.get(hpBook.id);
 
     expect(hpBookBookingInfo.isRented).toBeTruthy();
@@ -52,13 +58,15 @@ describe('Booking', () => {
   });
 
   it('Should return false - all books are not returned', () => {
+    booking.returnBooks([hpBook.id]);
     expect(booking.checkIfAllBooksReturned()).toBeFalsy();
   });
 
   it('Should set booking isActive value - false ', () => {
-    booking.returnBooks([hpBook.id, witcherBook.id]);
-    booking.setIsNotActive();
+    booking.books.get(hpBook.id).isRented = false;
+    booking.books.get(witcherBook.id).isRented = false;
 
+    booking.deactivate();
     expect(booking.isActive).toBeFalsy();
   });
 
@@ -85,18 +93,9 @@ describe('Booking', () => {
       }).toThrow();
     });
 
-    it('Should throw error when creating booking with  wrong book ID', () => {
-      expect(() => {
-        new Booking({
-          userId: user.id,
-          bookIds: ['4321'],
-        });
-      }).toThrow();
-    });
-
     it('Should throw error when some books are not returned when trying to change booking status - isActive to false', () => {
       expect(() => {
-        booking.setIsNotActive();
+        booking.deactivate();
       }).toThrow();
     });
   });

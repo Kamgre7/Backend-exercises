@@ -1,37 +1,44 @@
-import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import {
+  Book,
+  IBook,
+} from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 import {
   Booking,
   BookingDetails,
+  IBooking,
 } from '../../../../be-fundamentals/OOP/library-hard/Booking/Booking';
-import { BookingHandler } from '../../../../be-fundamentals/OOP/library-hard/Booking/BookingHandler';
-import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  BookingHandler,
+  IBookingHandler,
+} from '../../../../be-fundamentals/OOP/library-hard/Booking/BookingHandler';
+import {
+  IUser,
+  User,
+} from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  hpBookDetails,
+  johnUserEmail,
+  lotrBookDetails,
+} from '../utils/constants';
 
 describe('BookingHandler', () => {
-  let harryPotter: Book;
-  let lordOfTheRings: Book;
-  let john: User;
-  let bookingHandler: BookingHandler;
+  let harryPotter: IBook;
+  let lordOfTheRings: IBook;
+  let john: IUser;
+  let bookingHandler: IBookingHandler;
   let johnBookingDetails: BookingDetails;
-  let johnBooking: Booking;
+  let johnBooking: IBooking;
 
   beforeAll(() => {
     bookingHandler = new BookingHandler();
   });
 
   beforeEach(() => {
-    john = new User('john@example.com');
+    john = new User(johnUserEmail);
 
-    harryPotter = new Book({
-      title: 'Harry Potter',
-      author: 'J.K Rowling',
-      isbn: '1234',
-    });
+    harryPotter = new Book({ ...hpBookDetails });
 
-    lordOfTheRings = new Book({
-      title: 'Lord Of The Rings',
-      author: 'J.R.R Tolkien',
-      isbn: '4321',
-    });
+    lordOfTheRings = new Book({ ...lotrBookDetails });
 
     johnBookingDetails = {
       bookIds: [harryPotter.id, lordOfTheRings.id],
@@ -45,7 +52,7 @@ describe('BookingHandler', () => {
     expect(bookingHandler).toBeInstanceOf(BookingHandler);
   });
 
-  it('Should set a book is returned', () => {
+  it('Should return book', () => {
     const bookBookingInfo = johnBooking.books.get(harryPotter.id);
 
     expect(bookBookingInfo.isRented).toBeTruthy();
@@ -60,38 +67,32 @@ describe('BookingHandler', () => {
   });
 
   it('Should set booking isActive value - false ', () => {
-    bookingHandler.returnBooks(johnBooking, [
-      harryPotter.id,
-      lordOfTheRings.id,
-    ]);
+    johnBooking.books.get(harryPotter.id).isRented = false;
+    johnBooking.books.get(lordOfTheRings.id).isRented = false;
 
-    bookingHandler.setIsNotActive(johnBooking);
+    bookingHandler.deactivateBooking(johnBooking);
 
     expect(johnBooking.isActive).toBeFalsy();
   });
 
   it('Should return booking returned date', () => {
-    johnBooking.getReturnDate();
     expect(johnBooking.getReturnDate()).toStrictEqual(johnBooking.returnedAt);
   });
 
   describe('Should throw error when', () => {
     it('Should throw error when some books are not returned when trying to change booking status - isActive to false', () => {
       expect(() => {
-        bookingHandler.setIsNotActive(johnBooking);
+        bookingHandler.deactivateBooking(johnBooking);
       }).toThrow();
     });
 
     it('Should throw error when trying to change the status to inactive when is already inactive', () => {
-      bookingHandler.returnBooks(johnBooking, [
-        harryPotter.id,
-        lordOfTheRings.id,
-      ]);
-
-      bookingHandler.setIsNotActive(johnBooking);
+      johnBooking.books.get(harryPotter.id).isRented = false;
+      johnBooking.books.get(lordOfTheRings.id).isRented = false;
+      johnBooking.isActive = false;
 
       expect(() => {
-        bookingHandler.setIsNotActive(johnBooking);
+        bookingHandler.deactivateBooking(johnBooking);
       }).toThrow();
     });
 
@@ -105,7 +106,7 @@ describe('BookingHandler', () => {
     });
 
     it('Should throw error when trying to return returned book', () => {
-      bookingHandler.returnBooks(johnBooking, [harryPotter.id]);
+      johnBooking.books.get(harryPotter.id).isRented = false;
 
       expect(() => {
         bookingHandler.returnBooks(johnBooking, [harryPotter.id]);

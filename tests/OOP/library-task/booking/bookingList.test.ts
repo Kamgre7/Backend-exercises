@@ -1,39 +1,45 @@
-import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import {
+  Book,
+  IBook,
+} from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 import {
   Booking,
   BookingDetails,
   IBooking,
 } from '../../../../be-fundamentals/OOP/library-hard/Booking/Booking';
-import { BookingList } from '../../../../be-fundamentals/OOP/library-hard/Booking/BookingList';
-import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  BookingList,
+  IBookingList,
+} from '../../../../be-fundamentals/OOP/library-hard/Booking/BookingList';
+import {
+  IUser,
+  User,
+} from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  hpBookDetails,
+  johnUserEmail,
+  lotrBookDetails,
+} from '../utils/constants';
 
 describe('BookingList', () => {
-  let harryPotter: Book;
-  let lordOfTheRings: Book;
-  let john: User;
-  let bookingList: BookingList;
+  let harryPotter: IBook;
+  let lordOfTheRings: IBook;
+  let john: IUser;
+  let bookingList: IBookingList;
   let bookings: Map<string, IBooking>;
   let johnBookingDetails: BookingDetails;
-  let johnBooking: Booking;
+  let johnBooking: IBooking;
 
   beforeAll(() => {
     bookingList = BookingList.getInstance(bookings);
   });
 
   beforeEach(() => {
-    john = new User('john@example.com');
+    john = new User(johnUserEmail);
 
-    harryPotter = new Book({
-      title: 'Harry Potter',
-      author: 'J.K Rowling',
-      isbn: '1234',
-    });
+    harryPotter = new Book({ ...hpBookDetails });
 
-    lordOfTheRings = new Book({
-      title: 'Lord Of The Rings',
-      author: 'J.R.R Tolkien',
-      isbn: '4321',
-    });
+    lordOfTheRings = new Book({ ...lotrBookDetails });
 
     johnBookingDetails = {
       bookIds: [harryPotter.id, lordOfTheRings.id],
