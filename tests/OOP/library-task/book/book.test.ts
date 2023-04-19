@@ -1,24 +1,18 @@
 import {
   Book,
   BookDetails,
+  IBook,
 } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import { bookData, hpBookDetails } from '../utils/constants';
 
 describe('Book', () => {
-  let book: Book;
+  let book: IBook;
   let bookDetails: BookDetails;
 
   beforeEach(() => {
-    book = new Book({
-      title: 'Harry Potter',
-      author: 'J.K Rowling',
-      isbn: '1234',
-    });
+    book = new Book({ ...hpBookDetails });
 
-    bookDetails = {
-      title: '',
-      author: 'Test',
-      isbn: '1234',
-    };
+    bookDetails = { ...bookData };
   });
 
   it('Should be instance of Book class', () => {

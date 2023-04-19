@@ -1,18 +1,21 @@
 import {
   Book,
   BookDetails,
+  IBook,
 } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 import {
   BookInformation,
   BookList,
+  IBookList,
 } from '../../../../be-fundamentals/OOP/library-hard/Book/BookList';
+import { bookData, hpBookDetails, lotrBookDetails } from '../utils/constants';
 
 describe('BookList', () => {
-  let bookList: BookList;
+  let bookList: IBookList;
   let books: Map<string, BookInformation>;
   let bookDetails: BookDetails;
-  let harryPotter: Book;
-  let lordOfTheRings: Book;
+  let harryPotter: IBook;
+  let lordOfTheRings: IBook;
   let hpInformation: BookInformation;
   let lotrInformation: BookInformation;
 
@@ -21,22 +24,14 @@ describe('BookList', () => {
   });
 
   beforeEach(() => {
-    harryPotter = new Book({
-      title: 'Harry Potter',
-      author: 'J.K Rowling',
-      isbn: '1234',
-    });
+    harryPotter = new Book({ ...hpBookDetails });
 
     hpInformation = {
       book: harryPotter,
       quantity: 10,
     };
 
-    lordOfTheRings = new Book({
-      title: 'Lord Of The Rings',
-      author: 'J.R.R Tolkien',
-      isbn: '4321',
-    });
+    lordOfTheRings = new Book({ ...lotrBookDetails });
 
     lotrInformation = {
       book: lordOfTheRings,
@@ -48,11 +43,7 @@ describe('BookList', () => {
       [lordOfTheRings.id, lotrInformation],
     ]);
 
-    bookDetails = {
-      author: 'Test',
-      isbn: '1234',
-      title: 'example',
-    };
+    bookDetails = { ...bookData };
 
     bookList.books = books;
   });
@@ -95,7 +86,7 @@ describe('BookList', () => {
     expect(bookInformation).toStrictEqual(hpInformation);
   });
 
-  it('Should return array of available book IDs, when book quantity > 1, book not deleted and book exists', () => {
+  it('Should return array of available book IDs, when: book quantity > 1, book not deleted and book exists', () => {
     const booksId = [harryPotter.id, lordOfTheRings.id, '1234', '4321'];
 
     expect(bookList.findAvailableBooksById(booksId)).toStrictEqual([

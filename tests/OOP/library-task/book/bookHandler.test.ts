@@ -1,10 +1,14 @@
-import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import {
+  Book,
+  IBook,
+} from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 import { BookHandler } from '../../../../be-fundamentals/OOP/library-hard/Book/BookHandler';
 import { BookInformation } from '../../../../be-fundamentals/OOP/library-hard/Book/BookList';
+import { hpBookDetails } from '../utils/constants';
 
 describe('BookHandler', () => {
   let bookHandler: BookHandler;
-  let harryPotter: Book;
+  let harryPotter: IBook;
   let hpInformation: BookInformation;
 
   beforeAll(() => {
@@ -12,11 +16,7 @@ describe('BookHandler', () => {
   });
 
   beforeEach(() => {
-    harryPotter = new Book({
-      title: 'Harry Potter',
-      author: 'J.K Rowling',
-      isbn: '1234',
-    });
+    harryPotter = new Book({ ...hpBookDetails });
 
     hpInformation = {
       book: harryPotter,
@@ -35,9 +35,9 @@ describe('BookHandler', () => {
   });
 
   it('Should set book title', () => {
-    bookHandler.setTitle(harryPotter, 'The Wither');
+    bookHandler.setTitle(harryPotter, 'The Witcher');
 
-    expect(harryPotter.title).toBe('The Wither');
+    expect(harryPotter.title).toBe('The Witcher');
   });
 
   it('Should set book isbn number', () => {
