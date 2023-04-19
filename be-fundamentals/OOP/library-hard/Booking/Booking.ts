@@ -17,7 +17,7 @@ export interface IBooking {
   isActive: boolean;
   createdAt: Date;
   returnedAt: Date | null;
-  setIsNotActive(): void;
+  deactivate(): void;
   returnBooks(bookIds: string[]): void;
   checkIfAllBooksReturned(): boolean;
   getBookingDate(): Date;
@@ -43,7 +43,7 @@ export class Booking implements IBooking {
     this.setBookingList(bookIds);
   }
 
-  setIsNotActive(): void {
+  deactivate(): void {
     if (!this.checkIfAllBooksReturned()) {
       throw new Error('Some books are not returned yet');
     }

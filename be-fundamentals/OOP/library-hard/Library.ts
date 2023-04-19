@@ -168,7 +168,7 @@ export class Library implements ILibrary {
     this.userHandler.checkIfBlockUser(userInformation);
 
     if (this.bookingHandler.checkIfAllBooksReturned(booking)) {
-      this.bookingHandler.setIsNotActive(booking);
+      this.bookingHandler.deactivateBooking(booking);
     }
   }
 
