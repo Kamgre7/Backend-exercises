@@ -1,7 +1,7 @@
 import { IBooking } from './Booking';
 
 export interface IBookingHandler {
-  setIsNotActive(booking: IBooking): void;
+  deactivateBooking(booking: IBooking): void;
   setReturnDate(booking: IBooking): void;
   returnBooks(booking: IBooking, bookIds: string[]): void;
   checkIfAllBooksReturned(booking: IBooking): boolean;
@@ -12,8 +12,10 @@ export interface IBookingHandler {
 }
 
 export class BookingHandler implements IBookingHandler {
-  setIsNotActive(booking: IBooking): void {
-    booking.setIsNotActive();
+  deactivateBooking(booking: IBooking): void {
+    this.checkIfBookingActiveOrThrow(booking);
+
+    booking.deactivate();
   }
 
   setReturnDate(booking: IBooking): void {

@@ -1,6 +1,6 @@
 import { DataValidator } from '../utils/DataValidator';
 import { bookDB } from '../utils/libraryDB';
-import { Book, BookDetails, IBook } from './Book';
+import { IBook } from './Book';
 
 export type BookInformation = {
   book: IBook;
@@ -9,9 +9,9 @@ export type BookInformation = {
 
 export interface IBookList {
   books: Map<string, BookInformation>;
-  addBook(bookDetails: BookDetails, quantity: number): string;
+  addBook(book: IBook, quantity: number): string;
   deleteBook(bookId: string): void;
-  findBookByIsbn(isbn: string): BookInformation;
+  findBookByIsbn(isbn: string): BookInformation | null;
   findBookByIdOrThrow(bookId: string): BookInformation;
   findBookById(bookId: string): BookInformation | null;
   findAvailableBooksById(bookIds: string[]): string[];
@@ -30,10 +30,8 @@ export class BookList implements IBookList {
     return BookList.instance;
   }
 
-  addBook(bookDetails: BookDetails, quantity: number): string {
+  addBook(book: IBook, quantity: number): string {
     DataValidator.checkIfNotEqualOrBelowZero(quantity);
-
-    const book = new Book(bookDetails);
 
     this.books.set(book.id, {
       book,

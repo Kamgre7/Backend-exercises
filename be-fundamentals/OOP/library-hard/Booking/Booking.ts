@@ -7,7 +7,7 @@ export type BookingDetails = {
 
 export type BookRentInformation = {
   isRented: boolean;
-  returnedAt: Date;
+  returnedAt: Date | null;
 };
 
 export interface IBooking {
@@ -17,7 +17,7 @@ export interface IBooking {
   isActive: boolean;
   createdAt: Date;
   returnedAt: Date | null;
-  setIsNotActive(): void;
+  deactivate(): void;
   returnBooks(bookIds: string[]): void;
   checkIfAllBooksReturned(): boolean;
   getBookingDate(): Date;
@@ -32,7 +32,7 @@ export class Booking implements IBooking {
   >();
   isActive: boolean = true;
   createdAt: Date = new Date();
-  returnedAt: Date;
+  returnedAt: Date | null = null;
 
   constructor(bookingDetails: BookingDetails, public readonly id = uuid()) {
     const { userId, bookIds } = bookingDetails;
@@ -43,7 +43,7 @@ export class Booking implements IBooking {
     this.setBookingList(bookIds);
   }
 
-  setIsNotActive(): void {
+  deactivate(): void {
     if (!this.checkIfAllBooksReturned()) {
       throw new Error('Some books are not returned yet');
     }

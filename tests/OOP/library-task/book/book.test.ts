@@ -1,14 +1,18 @@
-import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import {
+  Book,
+  BookDetails,
+  IBook,
+} from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import { bookData, hpBookDetails } from '../utils/constants';
 
 describe('Book', () => {
-  let book: Book;
+  let book: IBook;
+  let bookDetails: BookDetails;
 
   beforeEach(() => {
-    book = new Book({
-      title: 'Harry Potter',
-      author: 'J.K Rowling',
-      isbn: '1234',
-    });
+    book = new Book({ ...hpBookDetails });
+
+    bookDetails = { ...bookData };
   });
 
   it('Should be instance of Book class', () => {
@@ -33,38 +37,32 @@ describe('Book', () => {
     expect(book.isbn).toBe('4321');
   });
 
-  it('Should have default value of deletedAt - undefined', () => {
-    expect(book.deletedAt).toBeUndefined();
+  it('Should have default value of deletedAt - null', () => {
+    expect(book.deletedAt).toBeNull();
   });
 
   describe('Should throw error when', () => {
     it('Should throw error when creating book with empty title', () => {
+      bookDetails.title = '';
+
       expect(() => {
-        new Book({
-          title: '',
-          author: 'Test',
-          isbn: '1234',
-        });
+        new Book(bookDetails);
       }).toThrow();
     });
 
     it('Should throw error when creating book with empty author', () => {
+      bookDetails.author = '';
+
       expect(() => {
-        new Book({
-          title: 'Test',
-          author: '',
-          isbn: '1234',
-        });
+        new Book(bookDetails);
       }).toThrow();
     });
 
     it('Should throw error when creating book with empty isbn number', () => {
+      bookDetails.isbn = '';
+
       expect(() => {
-        new Book({
-          title: 'Title',
-          author: 'Test',
-          isbn: '',
-        });
+        new Book(bookDetails);
       }).toThrow();
     });
 

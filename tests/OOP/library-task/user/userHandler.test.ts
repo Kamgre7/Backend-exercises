@@ -1,45 +1,56 @@
-import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
-import { UserHandler } from '../../../../be-fundamentals/OOP/library-hard/User/UserHandler';
+import {
+  IUser,
+  User,
+} from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  IUserHandler,
+  UserHandler,
+} from '../../../../be-fundamentals/OOP/library-hard/User/UserHandler';
 import { UserInformation } from '../../../../be-fundamentals/OOP/library-hard/User/UserList';
-
-let userHandler: UserHandler;
-let john: User;
-let kate: User;
-let blockedUser: User;
-let kateInformation: UserInformation;
-let johnInformation: UserInformation;
-let blockedUserInformation: UserInformation;
-
-beforeAll(() => {
-  userHandler = new UserHandler();
-});
-
-beforeEach(() => {
-  kate = new User('kate@example.com');
-
-  kateInformation = {
-    user: kate,
-    penaltyPoints: 0,
-  };
-
-  john = new User('john@example.com');
-
-  johnInformation = {
-    user: john,
-    penaltyPoints: 0,
-  };
-
-  blockedUser = new User('blocked@example.com');
-
-  blockedUser.blockedAt = new Date('10/10/2022');
-
-  blockedUserInformation = {
-    user: blockedUser,
-    penaltyPoints: 10,
-  };
-});
+import { ALLOWED_BOOKING_TIME } from '../../../../be-fundamentals/OOP/library-hard/utils/utils';
+import {
+  blockedUserEmail,
+  johnUserEmail,
+  kateUserEmail,
+} from '../utils/constants';
 
 describe('UserHandler', () => {
+  let userHandler: IUserHandler;
+  let john: IUser;
+  let kate: IUser;
+  let blockedUser: IUser;
+  let kateInformation: UserInformation;
+  let johnInformation: UserInformation;
+  let blockedUserInformation: UserInformation;
+
+  beforeAll(() => {
+    userHandler = new UserHandler();
+  });
+
+  beforeEach(() => {
+    kate = new User(kateUserEmail);
+
+    kateInformation = {
+      user: kate,
+      penaltyPoints: 0,
+    };
+
+    john = new User(johnUserEmail);
+
+    johnInformation = {
+      user: john,
+      penaltyPoints: 0,
+    };
+
+    blockedUser = new User(blockedUserEmail);
+    blockedUser.blockedAt = new Date('10/10/2022');
+
+    blockedUserInformation = {
+      user: blockedUser,
+      penaltyPoints: 10,
+    };
+  });
+
   it('Should be a instance of UserHandler', () => {
     expect(userHandler).toBeInstanceOf(UserHandler);
   });
@@ -52,25 +63,21 @@ describe('UserHandler', () => {
 
   it('Should reactive soft deleted user', () => {
     john.deletedAt = new Date();
-    john.updatedAt = new Date();
-
-    expect(john.deletedAt).not.toBeNull();
-
     userHandler.reactiveDeletedUser(john);
 
     expect(john.deletedAt).toBeNull();
   });
 
   it('Should block user', () => {
-    expect(kate.blockedAt).toBeUndefined();
+    expect(kate.blockedAt).toBeNull();
 
     userHandler.blockUser(kate);
 
-    expect(kate.blockedAt).toBeDefined();
+    expect(kate.blockedAt).toBeInstanceOf(Date);
   });
 
   it('Should activate blocked user', () => {
-    expect(blockedUserInformation.penaltyPoints).toEqual(10);
+    blockedUserInformation.penaltyPoints = 10;
 
     userHandler.activateUser(blockedUserInformation);
 
@@ -78,13 +85,24 @@ describe('UserHandler', () => {
     expect(blockedUserInformation.user.blockedAt).toBeNull();
   });
 
-  it('Should add 5 penalty points to user - 7 days allowed to return book, in test passed 12 days ', () => {
+  it('Should calculate penalty points', () => {
+    const daysPassedAfterBooking = 12;
     const bookingDate = new Date();
-    bookingDate.setDate(bookingDate.getDate() - 12);
 
-    const pointsToAdd = userHandler.calculatePenaltyPoints(bookingDate);
+    bookingDate.setDate(bookingDate.getDate() - daysPassedAfterBooking);
 
-    userHandler.setUserPenaltyPoints(kateInformation, pointsToAdd);
+    const penaltyPoints = userHandler.calculatePenaltyPoints(bookingDate);
+
+    expect(penaltyPoints).toEqual(
+      daysPassedAfterBooking - ALLOWED_BOOKING_TIME
+    );
+  });
+
+  it('Should add penalty points to user', () => {
+    kateInformation.penaltyPoints = 0;
+    const penaltyPoints = 5;
+
+    userHandler.setUserPenaltyPoints(kateInformation, penaltyPoints);
 
     expect(kateInformation.penaltyPoints).toEqual(5);
   });
@@ -114,6 +132,18 @@ describe('UserHandler', () => {
       expect(() => {
         userHandler.checkIfUserCanBeReactivated(john);
       });
+    });
+
+    it('Should throw error when user cannot be unblocked', () => {
+      const daysUserBlocked = 15;
+      const timePeriodToUnblock = 30;
+
+      expect(() => {
+        userHandler.checkIfUserAllowedToUnblockOrThrow(
+          daysUserBlocked,
+          timePeriodToUnblock
+        );
+      }).toThrow();
     });
   });
 });

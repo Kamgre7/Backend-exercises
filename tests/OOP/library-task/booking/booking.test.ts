@@ -1,34 +1,40 @@
-import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
-import { Booking } from '../../../../be-fundamentals/OOP/library-hard/Booking/Booking';
-import { User } from '../../../../be-fundamentals/OOP/library-hard/User/User';
-
-let booking: Booking;
-let user: User;
-let hpBook: Book;
-let witcherBook: Book;
-
-beforeEach(() => {
-  user = new User('user@email.com');
-
-  hpBook = new Book({
-    title: 'Harry Potter',
-    author: 'J.K Rowling',
-    isbn: '1234',
-  });
-
-  witcherBook = new Book({
-    title: 'The Witcher',
-    author: 'A. Sapkowski',
-    isbn: 'BYS321',
-  });
-
-  booking = new Booking({
-    bookIds: [hpBook.id, witcherBook.id],
-    userId: user.id,
-  });
-});
+import {
+  Book,
+  IBook,
+} from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import {
+  Booking,
+  IBooking,
+} from '../../../../be-fundamentals/OOP/library-hard/Booking/Booking';
+import {
+  IUser,
+  User,
+} from '../../../../be-fundamentals/OOP/library-hard/User/User';
+import {
+  hpBookDetails,
+  johnUserEmail,
+  witcherBookDetails,
+} from '../utils/constants';
 
 describe('Booking', () => {
+  let booking: IBooking;
+  let user: IUser;
+  let hpBook: IBook;
+  let witcherBook: IBook;
+
+  beforeEach(() => {
+    user = new User(johnUserEmail);
+
+    hpBook = new Book({ ...hpBookDetails });
+
+    witcherBook = new Book({ ...witcherBookDetails });
+
+    booking = new Booking({
+      bookIds: [hpBook.id, witcherBook.id],
+      userId: user.id,
+    });
+  });
+
   it('Should be instance of Booking class', () => {
     expect(booking).toBeInstanceOf(Booking);
   });
@@ -37,32 +43,34 @@ describe('Booking', () => {
     expect(booking.isActive).toBeTruthy();
   });
 
-  it('Should have default value of returnedAt - undefined', () => {
-    expect(booking.returnedAt).toBeUndefined();
+  it('Should have default value of returnedAt - null', () => {
+    expect(booking.returnedAt).toBeNull();
   });
 
-  it('Should set book is returned', () => {
-    booking.returnBooks([hpBook.id]);
+  it('Should return book', () => {
     const hpBookBookingInfo = booking.books.get(hpBook.id);
-    const witherBookBookingInfo = booking.books.get(witcherBook.id);
+
+    expect(hpBookBookingInfo.isRented).toBeTruthy();
+
+    booking.returnBooks([hpBook.id]);
 
     expect(hpBookBookingInfo.isRented).toBeFalsy();
-    expect(witherBookBookingInfo.isRented).toBeTruthy();
   });
 
-  it('Should return false - books are not returned', () => {
+  it('Should return false - all books are not returned', () => {
+    booking.returnBooks([hpBook.id]);
     expect(booking.checkIfAllBooksReturned()).toBeFalsy();
   });
 
   it('Should set booking isActive value - false ', () => {
-    booking.returnBooks([hpBook.id, witcherBook.id]);
-    booking.setIsNotActive();
+    booking.books.get(hpBook.id).isRented = false;
+    booking.books.get(witcherBook.id).isRented = false;
 
+    booking.deactivate();
     expect(booking.isActive).toBeFalsy();
   });
 
   it('Should return booking returned date', () => {
-    booking.getReturnDate();
     expect(booking.getReturnDate()).toStrictEqual(booking.returnedAt);
   });
 
@@ -87,7 +95,7 @@ describe('Booking', () => {
 
     it('Should throw error when some books are not returned when trying to change booking status - isActive to false', () => {
       expect(() => {
-        booking.setIsNotActive();
+        booking.deactivate();
       }).toThrow();
     });
   });

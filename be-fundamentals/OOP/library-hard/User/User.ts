@@ -15,8 +15,8 @@ export class User implements IUser {
   email: string;
   createdAt: Date = new Date();
   updatedAt: Date;
-  deletedAt: Date | null;
-  blockedAt: Date;
+  deletedAt: Date | null = null;
+  blockedAt: Date | null = null;
 
   constructor(email: string, public readonly id = uuid()) {
     this.validateMail(email);

@@ -1,13 +1,13 @@
-import { BookDetails } from './Book/Book';
+import { Book, BookDetails } from './Book/Book';
 import { BookHandler, IBookHandler } from './Book/BookHandler';
 import { BookingHandler, IBookingHandler } from './Booking/BookingHandler';
 import { BookingList, IBookingList } from './Booking/BookingList';
 import { BookList, IBookList } from './Book/BookList';
 import { bookDB, bookingDB, userDB } from './utils/libraryDB';
-import { IUser } from './User/User';
+import { IUser, User } from './User/User';
 import { IUserHandler, UserHandler } from './User/UserHandler';
 import { IUserList, UserInformation, UserList } from './User/UserList';
-import { IBooking } from './Booking/Booking';
+import { Booking, IBooking } from './Booking/Booking';
 
 export interface ILibrary {
   addBook(bookDetails: BookDetails, quantity: number): string;
@@ -31,7 +31,6 @@ export class Library implements ILibrary {
     private readonly bookHandler: IBookHandler,
     private readonly userHandler: IUserHandler,
     private readonly bookingHandler: IBookingHandler,
-
     private readonly bookList: IBookList,
     private readonly userList: IUserList,
     private readonly bookingList: IBookingList
@@ -68,7 +67,9 @@ export class Library implements ILibrary {
       return bookInformation.book.id;
     }
 
-    return this.bookList.addBook(bookDetails, quantity);
+    const book = new Book(bookDetails);
+
+    return this.bookList.addBook(book, quantity);
   }
 
   deleteBook(bookId: string): void {
@@ -102,7 +103,9 @@ export class Library implements ILibrary {
       return userInformation.user.id;
     }
 
-    return this.userList.addUser(email);
+    const user = new User(email);
+
+    return this.userList.addUser(user);
   }
 
   deleteUser(userId: string): void {
@@ -135,14 +138,16 @@ export class Library implements ILibrary {
 
     const availableBookIds = this.bookList.findAvailableBooksById(bookIds);
 
-    const bookingId = this.bookingList.addBooking({
+    const booking = new Booking({
       bookIds: availableBookIds,
       userId: userInformation.user.id,
     });
 
+    this.bookingList.addBooking(booking);
+
     this.changeBookQuantity(availableBookIds, -1);
 
-    return bookingId;
+    return booking.id;
   }
 
   returnBook(bookingId: string, bookIds: string[]): void {
@@ -163,7 +168,7 @@ export class Library implements ILibrary {
     this.userHandler.checkIfBlockUser(userInformation);
 
     if (this.bookingHandler.checkIfAllBooksReturned(booking)) {
-      this.bookingHandler.setIsNotActive(booking);
+      this.bookingHandler.deactivateBooking(booking);
     }
   }
 

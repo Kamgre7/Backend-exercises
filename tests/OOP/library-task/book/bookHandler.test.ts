@@ -1,29 +1,29 @@
-import { Book } from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
+import {
+  Book,
+  IBook,
+} from '../../../../be-fundamentals/OOP/library-hard/Book/Book';
 import { BookHandler } from '../../../../be-fundamentals/OOP/library-hard/Book/BookHandler';
 import { BookInformation } from '../../../../be-fundamentals/OOP/library-hard/Book/BookList';
-
-let bookHandler: BookHandler;
-let harryPotter: Book;
-let hpInformation: BookInformation;
-
-beforeAll(() => {
-  bookHandler = new BookHandler();
-});
-
-beforeEach(() => {
-  harryPotter = new Book({
-    title: 'Harry Potter',
-    author: 'J.K Rowling',
-    isbn: '1234',
-  });
-
-  hpInformation = {
-    book: harryPotter,
-    quantity: 10,
-  };
-});
+import { hpBookDetails } from '../utils/constants';
 
 describe('BookHandler', () => {
+  let bookHandler: BookHandler;
+  let harryPotter: IBook;
+  let hpInformation: BookInformation;
+
+  beforeAll(() => {
+    bookHandler = new BookHandler();
+  });
+
+  beforeEach(() => {
+    harryPotter = new Book({ ...hpBookDetails });
+
+    hpInformation = {
+      book: harryPotter,
+      quantity: 10,
+    };
+  });
+
   it('Should be a instance of BookHandler', () => {
     expect(bookHandler).toBeInstanceOf(BookHandler);
   });
@@ -35,9 +35,9 @@ describe('BookHandler', () => {
   });
 
   it('Should set book title', () => {
-    bookHandler.setTitle(harryPotter, 'The Wither');
+    bookHandler.setTitle(harryPotter, 'The Witcher');
 
-    expect(harryPotter.title).toBe('The Wither');
+    expect(harryPotter.title).toBe('The Witcher');
   });
 
   it('Should set book isbn number', () => {
